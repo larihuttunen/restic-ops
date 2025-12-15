@@ -68,4 +68,4 @@ Timers and services for:
     systemctl list-timers | grep restic
     ```
 
-For full details and advanced configuration see the [Deployment Guide](Deployment.md).
+For full details and advanced configuration see the [Deployment Guide](docs/Deployment.md).
