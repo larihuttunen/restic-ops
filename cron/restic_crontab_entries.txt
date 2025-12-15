@@ -1,0 +1,10 @@
+# Cron jobs replicating systemd timers for restic
+
+# Daily backup at 02:00
+0 2 * * * /usr/local/bin/restic-ops/bin/backup.sh >> /var/log/restic-backup.log 2>&1
+
+# Weekly retention on Sunday at 03:30
+30 3 * * 0 /usr/local/bin/restic-ops/bin/retention.sh >> /var/log/restic-retention.log 2>&1
+
+# Weekly cache cleanup on Sunday at 04:00
+0 4 * * 0 /usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic >> /var/log/restic-cache-clean.log 2>&1
