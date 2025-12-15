@@ -31,6 +31,7 @@ export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/path"
 export RESTIC_PASSWORD="your-strong-password"
 export AWS_ACCESS_KEY_ID="AKIA..."
 export AWS_SECRET_ACCESS_KEY="..."
+export RESTIC_CACHE_DIR="/var/cache/restic"   # Central cache directory with enough space
 ```
 
 * Encrypt and remove plaintext:
@@ -78,6 +79,37 @@ sudo systemctl enable --now restic-backup@<profile>.timer
 
 ```
 sudo systemctl enable --now restic-retention@<profile>.timer
+```
+
+* Enable weekly cleanup by creating systemd/restic-cache-clean.service
+
+```
+[Unit]
+Description=Clean restic cache
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic
+```
+
+* Create systemd/restic-cache-clean.timer
+
+```
+[Unit]
+Description=Weekly restic cache cleanup
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+* Enable timer:
+
+```
+sudo systemctl enable --now restic-cache-clean.timer
 ```
 
 * Check timers:
