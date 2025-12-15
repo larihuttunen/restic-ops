@@ -1,2 +1,2 @@
-# restic-toolkit
+# restic-ops
 A command-line framework for automating backup and restore via restic.
