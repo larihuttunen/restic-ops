@@ -1,0 +1,6 @@
+[Unit]
+Description=Restic retention cleanup (%i)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/restic-ops/bin/retention.sh %i

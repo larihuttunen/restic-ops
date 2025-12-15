@@ -1,0 +1,2 @@
+# Weekly on Sunday 03:30
+30 3 * * 0 /usr/local/bin/restic-ops/bin/retention.sh s3-prod >>/var/log/restic-retention.log 2>&1

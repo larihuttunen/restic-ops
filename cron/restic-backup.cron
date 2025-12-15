@@ -1,0 +1,2 @@
+# Daily at 02:00
+0 2 * * * /usr/local/bin/restic-ops/bin/backup.sh s3-prod --tag daily >>/var/log/restic-backup.log 2>&1

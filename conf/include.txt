@@ -1,0 +1,4 @@
+/etc
+# Add your paths below
+# /home/lari/Projects
+# /var/lib/postgresql/backups
