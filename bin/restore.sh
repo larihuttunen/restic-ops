@@ -1,15 +1,18 @@
 #!/usr/bin/env sh
-# Usage: restore.sh <profile> <snapshot-id|latest> <target-dir> [--include ... | --exclude ...]
+# Usage: restore.sh <snapshot-id|latest> <target-dir> [restic restore args]
 set -eu
 SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/common.sh"
 
-PROFILE="${1:-}"; SNAP="${2:-}"; TARGET="${3:-}"
-[ -n "$PROFILE" ] && [ -n "$SNAP" ] && [ -n "$TARGET" ] || {
-  echo "Usage: $0 <profile> <snapshot-id|latest> <target-dir> [restic restore args]"; exit 1; }
-shift 3 || true
+SNAP="${1:-}"
+TARGET="${2:-}"
+if [ -z "$SNAP" ] || [ -z "$TARGET" ]; then
+  echo "Usage: $0 <snapshot-id|latest> <target-dir> [restic restore args]"
+  exit 1
+fi
+shift 2 || true
 
-SECRETS="$SCRIPT_DIR/../conf/secrets/${PROFILE}.env.gpg"
+SECRETS="$SCRIPT_DIR/../conf/secrets/restic.env.gpg"
 load_secrets "$SECRETS"
 require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 

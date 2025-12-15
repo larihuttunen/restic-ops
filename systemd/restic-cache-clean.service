@@ -1,5 +1,5 @@
 [Unit]
-Description=Clean restic cache
+Description=Restic cache cleanup
 
 [Service]
 Type=oneshot

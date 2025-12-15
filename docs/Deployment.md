@@ -24,14 +24,30 @@ Edit:
 ## 3. Create Secrets (Symmetric Encryption)
 
 * We use symmetric encryption with gpg-agent for caching the passphrase.
-* Create conf/secrets/restic.env with export lines:
+* Create `conf/secrets/restic.env` with export lines (put your Repo URL, password, S3 or Azure credentials, etc):
 
-```
+```sh
+# Repository: choose one backend
+# For S3:
 export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/path"
+# Or for Azure:
+export RESTIC_REPOSITORY="azure:your-container-name:optional/prefix"
+
+# Restic repository password
 export RESTIC_PASSWORD="your-strong-password"
+
+# S3 backend settings
 export AWS_ACCESS_KEY_ID="AKIA..."
 export AWS_SECRET_ACCESS_KEY="..."
-export RESTIC_CACHE_DIR="/var/cache/restic"   # Central cache directory with enough space
+
+# Azure backend settings
+export AZURE_ACCOUNT_NAME="your-storage-account-name"
+export AZURE_ACCOUNT_KEY="your-storage-account-key"
+# Optional: SAS token if using it
+# export AZURE_SAS_TOKEN="?sv=..."
+
+# Optional: central cache directory
+export RESTIC_CACHE_DIR="/var/cache/restic"
 ```
 
 * Encrypt and remove plaintext:
@@ -42,11 +58,23 @@ rm conf/secrets/restic.env
 ```
 
 * Decrypt in scripts:
+
 ```
 eval "$(gpg --batch --quiet --decrypt conf/secrets/restic.env.gpg)"
 ```
 
-* For unattended use, rely on gpg-agent caching. No passphrase file is needed if you supply the passphrase interactively once.
+* For unattended use: configure gpg-agent TTL in ~/.gnupg/gpg-agent.conf:
+
+```
+default-cache-ttl 3456000
+max-cache-ttl 3456000
+```
+
+* Reload with 
+
+```
+gpgconf --reload gpg-agent
+```
 
 ## 4. Initialize Repository
 

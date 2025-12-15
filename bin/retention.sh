@@ -1,17 +1,13 @@
 #!/usr/bin/env sh
-# Usage: retention.sh <profile>
+# Usage: retention.sh
 set -eu
 SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/common.sh"
 
-PROFILE="${1:-}"
-[ -n "$PROFILE" ] || { echo "Usage: $0 <profile>"; exit 1; }
-
-SECRETS="$SCRIPT_DIR/../conf/secrets/${PROFILE}.env.gpg"
+SECRETS="$SCRIPT_DIR/../conf/secrets/restic.env.gpg"
 load_secrets "$SECRETS"
 require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 
-# Retention policy: adjust to taste
 KEEP_DAILY="${KEEP_DAILY:-14}"
 KEEP_MONTHLY="${KEEP_MONTHLY:-6}"
 KEEP_YEARLY="${KEEP_YEARLY:-3}"

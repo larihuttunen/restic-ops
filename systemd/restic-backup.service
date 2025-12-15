@@ -1,8 +1,9 @@
 [Unit]
-Description=Restic backup (%i)
-Wants=network-online.target
+Description=Restic backup
 After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/restic-ops/bin/backup.sh %i --tag daily
+WorkingDirectory=/usr/local/bin/restic-ops
+ExecStart=/usr/local/bin/restic-ops/bin/backup.sh

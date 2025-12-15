@@ -1,8 +1,8 @@
 [Unit]
-Description=Run restic backup (%i) daily
+Description=Run restic backup daily
 
 [Timer]
-OnCalendar=*-*-* 02:00:00
+OnCalendar=daily
 Persistent=true
 
 [Install]

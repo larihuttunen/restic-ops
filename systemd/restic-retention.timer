@@ -1,8 +1,8 @@
 [Unit]
-Description=Run restic retention (%i) weekly
+Description=Run restic retention weekly
 
 [Timer]
-OnCalendar=Sun *-*-* 03:30:00
+OnCalendar=weekly
 Persistent=true
 
 [Install]
