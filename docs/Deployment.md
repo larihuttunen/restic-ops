@@ -21,10 +21,10 @@ Edit:
 * conf/include.txt → paths to back up (e.g., /etc, /home, /var/lib/postgresql/backups)
 * conf/exclude.txt → patterns to skip (e.g., *.tmp, /.cache/)
 
-## 3. Create Secrets for Profile (Symmetric Encryption)
+## 3. Create Secrets (Symmetric Encryption)
 
 * We use symmetric encryption with gpg-agent for caching the passphrase.
-* Create conf/secrets/<profile>.env with export lines:
+* Create conf/secrets/restic.env with export lines:
 
 ```
 export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/path"
@@ -37,13 +37,13 @@ export RESTIC_CACHE_DIR="/var/cache/restic"   # Central cache directory with eno
 * Encrypt and remove plaintext:
 
 ```
-gpg --symmetric --cipher-algo AES256 conf/secrets/<profile>.env
-rm conf/secrets/<profile>.env
+gpg --symmetric --cipher-algo AES256 conf/secrets/restic.env
+rm conf/secrets/restic.env
 ```
 
 * Decrypt in scripts:
 ```
-eval "$(gpg --batch --quiet --decrypt conf/secrets/<profile>.env.gpg)"
+eval "$(gpg --batch --quiet --decrypt conf/secrets/restic.env.gpg)"
 ```
 
 * For unattended use, rely on gpg-agent caching. No passphrase file is needed if you supply the passphrase interactively once.
@@ -52,7 +52,7 @@ eval "$(gpg --batch --quiet --decrypt conf/secrets/<profile>.env.gpg)"
 
 * Dry run first:
 ```
-bin/backup.sh <profile> --dry-run
+bin/backup.sh --dry-run
 ```
 
 * Initialize:
@@ -62,48 +62,70 @@ restic init
 
 ## 5. Enable Systemd Timers
 
-* Link repo for systemd:
+To schedule backups, retention, and cache maintenance, follow these steps:
 
-```
-sudo ln -s "$(pwd)" /usr/local/bin/restic-ops
+### Install unit files
+Copy all service and timer files from your repo into systemd’s directory:
+
+```bash
 sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 ```
 
-* Enable daily backup:
+### Enable timers
+Enable **daily backup**:
 
-```
+```bash
 sudo systemctl enable --now restic-backup.timer
 ```
 
-* Enable weekly retention:
+Enable **weekly retention**:
 
-```
+```bash
 sudo systemctl enable --now restic-retention.timer
 ```
 
-* Create systemd/restic-cache-clean.timer
+Enable **weekly cache cleanup**:
 
-```
+```bash
 sudo systemctl enable --now restic-cache-clean.timer
 ```
 
-* Enable timer:
+### Check timers
 
-```
-sudo systemctl enable --now restic-cache-clean.timer
-```
-
-* Check timers:
-
-```
+```bash
 systemctl list-timers | grep restic
 ```
 
-## 6. Verify Logs
+---
+
+### Cache Cleanup Units (already included in `systemd/`)
+
+`systemd/restic-cache-clean.service`:
+```ini
+[Unit]
+Description=Clean restic cache
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic
+```
+
+`systemd/restic-cache-clean.timer`:
+```ini
+[Unit]
+Description=Weekly restic cache cleanup
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```## 6. Verify Logs
 
 ```
-journalctl -u restic-backup@<profile>.service
+journalctl -u restic-backup.service
 ```
 
 ## 7. Restore
@@ -111,13 +133,13 @@ journalctl -u restic-backup@<profile>.service
 * Restore latest snapshot:
 
 ```
-bin/restore.sh <profile> latest /tmp/restore
+bin/restore.sh latest /tmp/restore
 ```
 
 * Restore by ID:
 
 ```
-bin/restore.sh <profile> <snapshot-id> /tmp/restore --include /etc
+bin/restore.sh <snapshot-id> /tmp/restore --include /etc
 ```
 
 ## 8. Retention Policy
@@ -130,7 +152,7 @@ bin/restore.sh <profile> <snapshot-id> /tmp/restore --include /etc
 * Override:
 
 ```
-KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh <profile>
+KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh
 ```
 
 ## 9. Using gpg-agent with Symmetric Encryption
@@ -159,7 +181,7 @@ systemctl --user enable --now gpg-agent.service
  - Run:
 
 ```
-gpg --decrypt conf/secrets/<profile>.env.gpg
+gpg --decrypt conf/secrets/restic.env.gpg
 ```
 
 * Enter the passphrase manually. gpg-agent caches it for 40 days. After this, systemd timers can run unattended without prompts.
@@ -176,7 +198,7 @@ gpg --decrypt conf/secrets/<profile>.env.gpg
 
 ## 10. Troubleshooting
 
-* Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/<profile>.env.gpg to refresh.
+* Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/restic.env.gpg to refresh.
 * After reboot: Cache is cleared. Supply passphrase interactively again.
 * Agent not running: Start with systemctl --user start gpg-agent.service.
 * TTL not applied: Verify ~/.gnupg/gpg-agent.conf and reload with gpgconf --reload gpg-agent.
@@ -192,4 +214,3 @@ gpg --decrypt conf/secrets/<profile>.env.gpg
 * Symmetric mode is simpler but requires secure passphrase handling.
 * Avoid set -x in scripts.
 * Always use HTTPS endpoints.
-
