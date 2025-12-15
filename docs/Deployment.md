@@ -52,29 +52,25 @@ export RESTIC_CACHE_DIR="/var/cache/restic"
 
 * Encrypt and remove plaintext:
 
-```
+```sh
 gpg --symmetric --cipher-algo AES256 conf/secrets/restic.env
 rm conf/secrets/restic.env
 ```
 
 * Decrypt in scripts:
 
-```
+```sh
 eval "$(gpg --batch --quiet --decrypt conf/secrets/restic.env.gpg)"
 ```
 
-* For unattended use: configure gpg-agent TTL in ~/.gnupg/gpg-agent.conf:
-
+* For unattended use: configure `gpg-agent` TTL in `~/.gnupg/gpg-agent.conf`:
 ```
 default-cache-ttl 3456000
 max-cache-ttl 3456000
 ```
+Reload with `gpgconf --reload gpg-agent`.
 
-* Reload with 
-
-```
-gpgconf --reload gpg-agent
-```
+> **Note on the format of `RESTIC_REPOSITORY`:** restic uses the prefix to select the backend: start with `s3:` for S3 or `azure:` for Azure. E.g. `s3:https://s3.amazonaws.com/mybucket/myprefix` or `azure:mycontainer:backups`.
 
 ## 4. Initialize Repository
 
@@ -90,39 +86,41 @@ restic init
 
 ## 5. Enable Systemd Timers
 
-To schedule backups, retention, and cache maintenance, follow these steps:
-
-### Install unit files
-
-Copy all service and timer files from your repo into systemd’s directory:
+* Link repo for systemd:
 
 ```
+sudo ln -s "$(pwd)" /usr/local/bin/restic-ops
 sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 ```
 
-### Enable timers
-Enable **daily backup**:
+* Enable daily backup:
 
-```bash
+```
 sudo systemctl enable --now restic-backup.timer
 ```
 
-Enable **weekly retention**:
+* Enable weekly retention:
 
-```bash
+```
 sudo systemctl enable --now restic-retention.timer
 ```
 
-Enable **weekly cache cleanup**:
+* Create systemd/restic-cache-clean.timer
 
-```bash
+```
 sudo systemctl enable --now restic-cache-clean.timer
 ```
 
-### Check timers
+* Enable timer:
 
-```bash
+```
+sudo systemctl enable --now restic-cache-clean.timer
+```
+
+* Check timers:
+
+```
 systemctl list-timers | grep restic
 ```
 
@@ -143,7 +141,7 @@ bin/restore.sh latest /tmp/restore
 * Restore by ID:
 
 ```
-bin/restore.sh <snapshot-id> /tmp/restore --include /etc
+bin/restore.sh  <snapshot-id> /tmp/restore --include /etc
 ```
 
 ## 8. Retention Policy
@@ -156,7 +154,7 @@ bin/restore.sh <snapshot-id> /tmp/restore --include /etc
 * Override:
 
 ```
-KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh
+KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh 
 ```
 
 ## 9. Using gpg-agent with Symmetric Encryption
@@ -185,7 +183,7 @@ systemctl --user enable --now gpg-agent.service
  - Run:
 
 ```
-gpg --decrypt conf/secrets/restic.env.gpg
+gpg --decrypt conf/secrets/.env.gpg
 ```
 
 * Enter the passphrase manually. gpg-agent caches it for 40 days. After this, systemd timers can run unattended without prompts.
@@ -202,7 +200,7 @@ gpg --decrypt conf/secrets/restic.env.gpg
 
 ## 10. Troubleshooting
 
-* Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/restic.env.gpg to refresh.
+* Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/.env.gpg to refresh.
 * After reboot: Cache is cleared. Supply passphrase interactively again.
 * Agent not running: Start with systemctl --user start gpg-agent.service.
 * TTL not applied: Verify ~/.gnupg/gpg-agent.conf and reload with gpgconf --reload gpg-agent.
@@ -218,3 +216,4 @@ gpg --decrypt conf/secrets/restic.env.gpg
 * Symmetric mode is simpler but requires secure passphrase handling.
 * Avoid set -x in scripts.
 * Always use HTTPS endpoints.
+

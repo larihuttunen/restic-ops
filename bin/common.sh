@@ -7,7 +7,6 @@ load_secrets() {
   CRED_FILE="$1"
   [ -f "$CRED_FILE" ] || { log "ERROR: secrets file not found: $CRED_FILE"; exit 1; }
   if command -v gpg >/dev/null 2>&1; then
-    # If you need loopback (e.g., CI), add: --pinentry-mode loopback
     eval "$(gpg --batch --quiet --decrypt "$CRED_FILE")"
   else
     log "ERROR: gpg not available"; exit 1
