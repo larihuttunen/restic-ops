@@ -66,44 +66,26 @@ restic init
 
 ```
 sudo ln -s "$(pwd)" /usr/local/bin/restic-ops
+sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 ```
 
 * Enable daily backup:
 
 ```
-sudo systemctl enable --now restic-backup@<profile>.timer
+sudo systemctl enable --now restic-backup.timer
 ```
 
 * Enable weekly retention:
 
 ```
-sudo systemctl enable --now restic-retention@<profile>.timer
-```
-
-* Enable weekly cleanup by creating systemd/restic-cache-clean.service
-
-```
-[Unit]
-Description=Clean restic cache
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic
+sudo systemctl enable --now restic-retention.timer
 ```
 
 * Create systemd/restic-cache-clean.timer
 
 ```
-[Unit]
-Description=Weekly restic cache cleanup
-
-[Timer]
-OnCalendar=Sun *-*-* 04:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
+sudo systemctl enable --now restic-cache-clean.timer
 ```
 
 * Enable timer:

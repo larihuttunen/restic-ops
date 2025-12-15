@@ -1,0 +1,6 @@
+[Unit]
+Description=Clean restic cache
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic
