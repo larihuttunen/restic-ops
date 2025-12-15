@@ -78,6 +78,7 @@ sudo systemctl enable --now restic-backup@<profile>.timer
 
 ```
 sudo systemctl enable --now restic-retention@<profile>.timer
+```
 
 * Check timers:
 
