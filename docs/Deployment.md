@@ -65,9 +65,10 @@ restic init
 To schedule backups, retention, and cache maintenance, follow these steps:
 
 ### Install unit files
+
 Copy all service and timer files from your repo into systemd’s directory:
 
-```bash
+```
 sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 ```
@@ -97,32 +98,7 @@ sudo systemctl enable --now restic-cache-clean.timer
 systemctl list-timers | grep restic
 ```
 
----
-
-### Cache Cleanup Units (already included in `systemd/`)
-
-`systemd/restic-cache-clean.service`:
-```ini
-[Unit]
-Description=Clean restic cache
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/restic cache --cleanup --max-age 30 --cache-dir /var/cache/restic
-```
-
-`systemd/restic-cache-clean.timer`:
-```ini
-[Unit]
-Description=Weekly restic cache cleanup
-
-[Timer]
-OnCalendar=Sun *-*-* 04:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```## 6. Verify Logs
+## 6. Verify Logs
 
 ```
 journalctl -u restic-backup.service
