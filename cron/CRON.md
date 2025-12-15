@@ -56,4 +56,4 @@ After saving your edits, you can list installed cron entries with `crontab -l` (
     – Prefix the commands with an `eval "$(gpg --quiet --batch --decrypt /path/to/restic.env.gpg)" && …` clause to decrypt before running.  
     – Source your `common.sh` from within the scripts themselves (our helpers already do that).
 
-For the canonical, more detailed explanation of variables, encryption and other topics, consult the [Deployment Guide](Deployment.md).
+For the canonical, more detailed explanation of variables, encryption and other topics, consult the [Deployment Guide](../docs/Deployment.md).
