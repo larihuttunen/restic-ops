@@ -3,7 +3,7 @@
 * This guide explains how to deploy restic-ops on a machine you want to back up. It assumes you have already cloned the repository and installed prerequisites.
 
 
-## 1. Prerequisites
+## Prerequisites
 
 * restic binary (download from https://github.com/restic/restic/releases)
 * gpg installed
@@ -15,13 +15,13 @@ git clone git@github.com:larihuttunen/restic-ops.git
 cd restic-ops
 ```
 
-## 2. Configure Include/Exclude Lists
+## Configure Include/Exclude Lists
 
 Edit:
 * conf/include.txt → paths to back up (e.g., /etc, /home, /var/lib/postgresql/backups)
 * conf/exclude.txt → patterns to skip (e.g., *.tmp, /.cache/)
 
-## 3. Create Secrets (Symmetric Encryption)
+## Create Secrets (Symmetric Encryption)
 
 * We use symmetric encryption with gpg-agent for caching the passphrase.
 * Create `conf/secrets/restic.env` with export lines (put your Repo URL, password, S3 or Azure credentials, etc):
@@ -72,7 +72,7 @@ Reload with `gpgconf --reload gpg-agent`.
 
 > **Note on the format of `RESTIC_REPOSITORY`:** restic uses the prefix to select the backend: start with `s3:` for S3 or `azure:` for Azure. E.g. `s3:https://s3.amazonaws.com/mybucket/myprefix` or `azure:mycontainer:backups`.
 
-## 4. Initialize Repository
+## Initialize Repository
 
 * Dry run first:
 ```
@@ -84,7 +84,7 @@ bin/backup.sh --dry-run
 restic init
 ```
 
-## 5. Enable Systemd Timers
+## Enable Systemd Timers
 
 * Link repo for systemd:
 
@@ -124,13 +124,13 @@ sudo systemctl enable --now restic-cache-clean.timer
 systemctl list-timers | grep restic
 ```
 
-## 6. Verify Logs
+## Verify Logs
 
 ```
 journalctl -u restic-backup.service
 ```
 
-## 7. Restore
+## Restore
 
 * Restore latest snapshot:
 
@@ -144,7 +144,7 @@ bin/restore.sh latest /tmp/restore
 bin/restore.sh  <snapshot-id> /tmp/restore --include /etc
 ```
 
-## 8. Retention Policy
+## Retention Policy
 
 * Default:
  - Daily: 14
@@ -157,7 +157,7 @@ bin/restore.sh  <snapshot-id> /tmp/restore --include /etc
 KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh 
 ```
 
-## 9. Using gpg-agent with Symmetric Encryption
+## Using gpg-agent with Symmetric Encryption
 
 * Systemd timers run non-interactively, so configure gpg-agent with a long TTL (40 days):
 * Edit ~/.gnupg/gpg-agent.conf:
@@ -198,7 +198,7 @@ gpg --decrypt conf/secrets/.env.gpg
 * Cache is lost on reboot unless you re-enter the passphrase.
 
 
-## 10. Troubleshooting
+## Troubleshooting
 
 * Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/.env.gpg to refresh.
 * After reboot: Cache is cleared. Supply passphrase interactively again.
