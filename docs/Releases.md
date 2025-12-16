@@ -52,15 +52,11 @@ Follow these steps to verify the signature on your local machine:
      ```
    - You should see output similar to:
      ```text
-     gpg: key ABCDEF0123456789: public key "Your Name <you@example.com>" imported
+     gpg: key 980B7F8FB079460F171E12FAFCB37F4C9D446871 
+public key "Lari Huttunen (This key is used for signing releases on Github.) <github-signing-key@inform.social>" imported
      gpg: Total number processed: 1
      gpg:               imported: 1
      ```
-   - If you do not already have the public key, ask the maintainer for it or fetch it from a keyserver:
-     ```sh
-     gpg --keyserver hkps://keys.openpgp.org --recv-keys ABCDEF0123456789
-     ```
-     Replace `ABCDEF0123456789` with the actual key ID published by the project.
 
 2. **Download the archive and its signature**
    - From the GitHub Releases page for the version you want, download both `restic-ops.run` and `restic-ops.run.asc` to the same directory.
@@ -72,7 +68,7 @@ Follow these steps to verify the signature on your local machine:
      ```
    - If the public key is not found in your keyring, GnuPG will print an error like:
      ```text
-     gpg: Signature made ... using RSA key ID ABCDEF0123456789
+     gpg: Signature made ... using RSA key ID 980B7F8FB079460F171E12FAFCB37F4C9D446871 
      gpg: Can't check signature: No public key
      ```
      In that case, return to step 1 and import the correct public key.
@@ -80,20 +76,21 @@ Follow these steps to verify the signature on your local machine:
 4. **Interpret the output**
    - A successful verification looks like:
      ```text
-     gpg: Signature made Thu 01 Jan 2021 12:34:56 PM UTC
-     gpg:                using RSA key ABCDEF0123456789
-     gpg: Good signature from "Your Name <you@example.com>" [ultimate]
+     $ gpg --verify restic-ops.run.asc restic-ops.run
+     gpg: Signature made Tue 16 Dec 2025 02:18:34 PM EET
+     gpg:                using RSA key 980B7F8FB079460F171E12FAFCB37F4C9D446871
+     gpg: Good signature from "Lari Huttunen (This key is used for signing releases on Github.) <github-signing-key@inform.social>" [ultimate]
      ```
      It means the archive is exactly what the maintainer signed and has not been altered. The key ID and name should match values published by the project. The `[ultimate]` or other trust indicator is the trust level assigned to the key in your keyring.
    - A bad signature prints:
      ```text
-     gpg: Signature made ... using RSA key ID ABCDEF0123456789
+     gpg: Signature made ... using RSA key ID E12FAFCB37F4C9D446871
      gpg: BAD signature from "Your Name <you@example.com>"
      ```
      which means the file may have been tampered with or corrupted; do **not** use it.
 
    - If the key you imported does not belong to the maintainer, the signature can still technically verify but the identity will not match what you expect. Always confirm the key fingerprint against what is published in the project documentation or by the maintainer:
      ```sh
-     gpg --fingerprint ABCDEF0123456789
+     gpg --fingerprint 980B7F8FB079460F171E12FAFCB37F4C9D446871
      ```
      The output shows the fingerprint; compare it to the known good fingerprint. If they match, the key is genuine.
