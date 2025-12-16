@@ -146,15 +146,31 @@ bin/restore.sh  <snapshot-id> /tmp/restore --include /etc
 
 ## Retention Policy
 
+* Restic interprets the three retention flags as independent buckets:
+ - `--keep-daily N`: the newest snapshot for each of the last N calendar days.
+ - `--keep-monthly M`: the newest snapshot for each of the last M calendar months (including the current one).
+ - `--keep-yearly Y`: the newest snapshot for each of the last Y calendar years.
+
+* The final set that gets kept is the union of those three subsets, so a single snapshot can satisfy multiple quotas and the number of distinct objects is usually less than N + M + Y.
+
+* Typical starting points for these values are:
+ - `daily = 31`: a full month of daily points for fine-grained rollback.
+ - `monthly = 12`: a year of month-end states. Bump to 13 if you want 12 complete months beyond the one covered by the daily window, or to 24 for two years, etc.
+ - `yearly = 3` or `4`: three or four annual snapshots for long-term recovery.
+
+Adjust the numbers based on your recovery objectives and storage budget: more snapshots give you a longer horizon and finer resolution, but they cost metadata space and increase the work for `restic forget && restic prune`. If you routinely discover problems after more than a few weeks, raise `daily`. If you need to restore from any month in the last year, use `monthly = 12` (or 13 for an extra month). If compliance demands two years of history set `monthly = 24`. Increase `yearly` if you need a longer multi-year trail. Remember that missed backup runs leave holes – retention cannot fill in gaps that never existed.
+
+### Default Policy
+
 * Default:
- - Daily: 14
- - Monthly: 6
- - Yearly: 3
+ - Daily: 31
+ - Monthly: 24
+ - Yearly: 4
 
 * Override:
 
 ```
-KEEP_DAILY=7 KEEP_MONTHLY=12 KEEP_YEARLY=5 bin/retention.sh 
+KEEP_DAILY=14 KEEP_MONTHLY=12 KEEP_YEARLY=2 bin/retention.sh 
 ```
 
 ## Using gpg-agent with Symmetric Encryption
