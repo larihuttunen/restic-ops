@@ -1,0 +1,55 @@
+# Trigger the workflow on new tags like v1.0.0
+name: Create and Publish Self-Extracting Archive
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Import your GPG key from GitHub Secrets
+      - name: Set up GPG
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      # Build the self-extracting archive
+      - name: Build self-extracting archive
+        run: |
+          rm -f restic-ops.tar.gz restic-ops.run
+          tar -czf restic-ops.tar.gz bin/ systemd/ README.md Deployment.md
+          cat <<'EOF' > restic-ops.run
+          #!/bin/sh
+          # Self-extracting archive for restic-ops
+          set -e
+          printf 'Extracting restic-ops...\n'
+          ARCHIVE_LINE=$(awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' "$0")
+          tail -n +${ARCHIVE_LINE} "$0" | tar xz
+          exit 0
+          __ARCHIVE_BELOW__
+          EOF
+          cat restic-ops.tar.gz >> restic-ops.run
+          chmod +x restic-ops.run
+
+      # Sign the archive with GPG
+      - name: Sign the archive
+        run: |
+          gpg --batch --yes --armor --detach-sign restic-ops.run
+
+      # Upload both archive and signature to the release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            restic-ops.run
+            restic-ops.run.asc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
