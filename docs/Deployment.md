@@ -70,18 +70,22 @@ max-cache-ttl 3456000
 ```
 Reload with `gpgconf --reload gpg-agent`.
 
-> **Note on the format of `RESTIC_REPOSITORY`:** restic uses the prefix to select the backend: start with `s3:` for S3 or `azure:` for Azure. E.g. `s3:https://s3.amazonaws.com/mybucket/myprefix` or `azure:mycontainer:backups`.
+> **Note on the format of `RESTIC_REPOSITORY`:** restic uses the prefix to
+> select the backend: start with `s3:` for S3 or `azure:` for Azure. E.g.
+> `s3:https://s3.amazonaws.com/mybucket/myprefix` or
+> `azure:mycontainer:backups`.
 
 ## Initialize Repository
+
+* Initialize the repository:
+
+```
+bin/init.sh
+```
 
 * Dry run first:
 ```
 bin/backup.sh --dry-run
-```
-
-* Initialize:
-```
-restic init
 ```
 
 ## Enable Systemd Timers
