@@ -6,6 +6,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -25,7 +28,7 @@ jobs:
       - name: Build self-extracting archive
         run: |
           rm -f restic-ops.tar.gz restic-ops.run
-          tar -czf restic-ops.tar.gz bin/ systemd/ README.md Deployment.md
+          tar -czf restic-ops.tar.gz bin/ conf/ cron/ systemd/ docs/ README.md GPG-KEY.asc
           cat <<'EOF' > restic-ops.run
           #!/bin/sh
           # Self-extracting archive for restic-ops
