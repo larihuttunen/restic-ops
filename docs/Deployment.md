@@ -1,239 +1,145 @@
-# Deployment Guide: restic-ops
+# Deployment Guide (Linux, systemd) — restic-ops
+
+This guide covers installing and upgrading restic-ops using the self-extracting release.  
+Configuration is always in `/etc/restic-ops` and is never overwritten by upgrades.
+
+---
+
+## Dependencies
+
+**Required (Linux):**
+- restic
+- gpg (and pinentry)
+- bash
+- systemd
+
+**Optional:**
+- jq (for enhanced stats output)
+- logrotate (for log file management)
+
+---
+
+## Directory Layout
+
+- **Code (versioned):** `/usr/local/lib/restic-ops/v0.2.0/`
+- **Symlink:** `/usr/local/bin/restic-ops` → current version
+- **Config (persistent):** `/etc/restic-ops/`
+  - `include.txt`
+  - `exclude.txt`
+  - `restic.env.gpg` (encrypted secrets)
+
+---
+
+## Installation Steps
+
+1. **Install dependencies.**
+2. **Download and verify the release:**
+   - Download `restic-ops.run` and its `.asc` signature.
+   - Verify with GPG (see Releases.md).
+3. **Extract the release:**
+   ```sh
+   mkdir -p /usr/local/lib/restic-ops/v0.2.0
+   cd /usr/local/lib/restic-ops/v0.2.0
+   /path/to/restic-ops.run
+````
+
+4.  **Symlink current version:**
+    ```sh
+    ln -sfn /usr/local/lib/restic-ops/v0.2.0 /usr/local/bin/restic-ops
+    ```
+5.  **Create persistent config:**
+    ```sh
+    mkdir -p /etc/restic-ops
+    cp /usr/local/bin/restic-ops/conf/include.sample.txt /etc/restic-ops/include.txt
+    cp /usr/local/bin/restic-ops/conf/exclude.sample.txt /etc/restic-ops/exclude.txt
+    vi /etc/restic-ops/include.txt
+    vi /etc/restic-ops/exclude.txt
+    ```
+6.  **Create and encrypt secrets:**
+    ```sh
+    vi /etc/restic-ops/restic.env
+    gpg --symmetric --cipher-algo AES256 /etc/restic-ops/restic.env
+    rm /etc/restic-ops/restic.env
+    ```
+7.  **Prime gpg-agent cache (once per reboot/agent restart):**
+    ```sh
+    export GNUPGHOME=/root/.gnupg
+    gpg -d /etc/restic-ops/restic.env.gpg >/dev/null
+    ```
+
+***
+
+## Initial Setup
+
+*   **Initialize repository:**
+    ```sh
+    /usr/local/bin/restic-ops/bin/init.sh
+    ```
+*   **Seed first backup:**
+    ```sh
+    /usr/local/bin/restic-ops/bin/backup.sh
+    ```
+
+***
+
+## Enable Automation (systemd)
+
+1.  **Copy systemd units:**
+    ```sh
+    cp /usr/local/bin/restic-ops/systemd/restic-*.service /etc/systemd/system/
+    cp /usr/local/bin/restic-ops/systemd/restic-*.timer /etc/systemd/system/
+    systemctl daemon-reload
+    ```
+2.  **Enable timers:**
+    ```sh
+    systemctl enable --now restic-backup.timer restic-retention.timer restic-prune.timer
+    ```
+3.  **(Optional) Enable persistent gpg-agent:**
+    ```sh
+    cp /usr/local/bin/restic-ops/systemd/gpg-agent-root.service /etc/systemd/system/
+    systemctl enable --now gpg-agent-root.service
+    ```
 
-* This guide explains how to deploy restic-ops on a machine you want to back up. It assumes you have already cloned the repository and installed prerequisites.
+***
 
+## Upgrading
 
-## Prerequisites
+1.  **Extract new release to a new versioned directory.**
+2.  **Switch symlink:**
+    ```sh
+    ln -sfn /usr/local/lib/restic-ops/v0.2.1 /usr/local/bin/restic-ops
+    ```
+3.  **Do not touch `/etc/restic-ops`**—your config stays put.
+4.  **Reload systemd and restart timers:**
+    ```sh
+    systemctl daemon-reload
+    systemctl restart restic-backup.timer restic-retention.timer restic-prune.timer
+    ```
 
-* restic binary (download from https://github.com/restic/restic/releases)
-* gpg installed
-* Systemd (recommended) or cron for scheduling
-* Clone the repo:
+***
 
-```
-git clone git@github.com:larihuttunen/restic-ops.git
-cd restic-ops
-```
+## Verification
 
-## Configure Include/Exclude Lists
+*   **Headless decrypt test:**
+    ```sh
+    env -i GNUPGHOME=/root/.gnupg gpg --batch --yes -d /etc/restic-ops/restic.env.gpg | head
+    ```
+*   **Check timers:**
+    ```sh
+    systemctl list-timers | grep restic
+    journalctl -u restic-backup.service -n 50
+    ```
 
-Edit:
-* conf/include.txt → paths to back up (e.g., /etc, /home, /var/lib/postgresql/backups)
-* conf/exclude.txt → patterns to skip (e.g., *.tmp, /.cache/)
+***
 
-## Create Secrets (Symmetric Encryption)
+## For BSD or cron-based installs
 
-* We use symmetric encryption with gpg-agent for caching the passphrase.
-* Create `conf/secrets/restic.env` with export lines (put your Repo URL, password, S3 or Azure credentials, etc):
+See `docs/CRON.md` for scheduling via cron.
 
-```sh
-# Repository: choose one backend
-# For S3:
-export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/path"
-# Or for Azure:
-export RESTIC_REPOSITORY="azure:your-container-name:optional/prefix"
+***
 
-# Restic repository password
-export RESTIC_PASSWORD="your-strong-password"
+## See also
 
-# S3 backend settings
-export AWS_ACCESS_KEY_ID="AKIA..."
-export AWS_SECRET_ACCESS_KEY="..."
-
-# Azure backend settings
-export AZURE_ACCOUNT_NAME="your-storage-account-name"
-export AZURE_ACCOUNT_KEY="your-storage-account-key"
-# Optional: SAS token if using it
-# export AZURE_SAS_TOKEN="?sv=..."
-
-# Optional: central cache directory
-export RESTIC_CACHE_DIR="/var/cache/restic"
-```
-
-* Encrypt and remove plaintext:
-
-```sh
-gpg --symmetric --cipher-algo AES256 conf/secrets/restic.env
-rm conf/secrets/restic.env
-```
-
-* Decrypt in scripts:
-
-```sh
-eval "$(gpg --batch --quiet --decrypt conf/secrets/restic.env.gpg)"
-```
-
-* For unattended use: configure `gpg-agent` TTL in `~/.gnupg/gpg-agent.conf`:
-```
-default-cache-ttl 3456000
-max-cache-ttl 3456000
-```
-Reload with `gpgconf --reload gpg-agent`.
-
-> **Note on the format of `RESTIC_REPOSITORY`:** restic uses the prefix to
-> select the backend: start with `s3:` for S3 or `azure:` for Azure. E.g.
-> `s3:https://s3.amazonaws.com/mybucket/myprefix` or
-> `azure:mycontainer:backups`.
-
-## Initialize Repository
-
-* Initialize the repository:
-
-```
-bin/init.sh
-```
-
-* Dry run first:
-```
-bin/backup.sh --dry-run
-```
-
-## Enable Systemd Timers
-
-* Link repo for systemd:
-
-```
-sudo ln -s "$(pwd)" /usr/local/bin/restic-ops
-sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
-sudo systemctl daemon-reload
-```
-
-* Enable daily backup:
-
-```
-sudo systemctl enable --now restic-backup.timer
-```
-
-* Enable weekly retention:
-
-```
-sudo systemctl enable --now restic-retention.timer
-```
-
-* Create systemd/restic-cache-clean.timer
-
-```
-sudo systemctl enable --now restic-cache-clean.timer
-```
-
-* Enable timer:
-
-```
-sudo systemctl enable --now restic-cache-clean.timer
-```
-
-* Check timers:
-
-```
-systemctl list-timers | grep restic
-```
-
-## Verify Logs
-
-```
-journalctl -u restic-backup.service
-```
-
-## Restore
-
-* Restore latest snapshot:
-
-```
-bin/restore.sh latest /tmp/restore
-```
-
-* Restore by ID:
-
-```
-bin/restore.sh  <snapshot-id> /tmp/restore --include /etc
-```
-
-## Retention Policy
-
-* Restic interprets the three retention flags as independent buckets:
- - `--keep-daily N`: the newest snapshot for each of the last N calendar days.
- - `--keep-monthly M`: the newest snapshot for each of the last M calendar months (including the current one).
- - `--keep-yearly Y`: the newest snapshot for each of the last Y calendar years.
-
-* The final set that gets kept is the union of those three subsets, so a single snapshot can satisfy multiple quotas and the number of distinct objects is usually less than N + M + Y.
-
-* Typical starting points for these values are:
- - `daily = 31`: a full month of daily points for fine-grained rollback.
- - `monthly = 12`: a year of month-end states. Bump to 13 if you want 12 complete months beyond the one covered by the daily window, or to 24 for two years, etc.
- - `yearly = 3` or `4`: three or four annual snapshots for long-term recovery.
-
-Adjust the numbers based on your recovery objectives and storage budget: more snapshots give you a longer horizon and finer resolution, but they cost metadata space and increase the work for `restic forget && restic prune`. If you routinely discover problems after more than a few weeks, raise `daily`. If you need to restore from any month in the last year, use `monthly = 12` (or 13 for an extra month). If compliance demands two years of history set `monthly = 24`. Increase `yearly` if you need a longer multi-year trail. Remember that missed backup runs leave holes – retention cannot fill in gaps that never existed.
-
-### Default Policy
-
-* Default:
- - Daily: 31
- - Monthly: 24
- - Yearly: 4
-
-* Override:
-
-```
-KEEP_DAILY=14 KEEP_MONTHLY=12 KEEP_YEARLY=2 bin/retention.sh 
-```
-
-## Using gpg-agent with Symmetric Encryption
-
-* Systemd timers run non-interactively, so configure gpg-agent with a long TTL (40 days):
-* Edit ~/.gnupg/gpg-agent.conf:
-
-```
-default-cache-ttl 3456000    # 40 days in seconds
-max-cache-ttl 3456000
-```
-
-* Reload agent:
-
-```
-gpgconf --reload gpg-agent
-```
-
-* Enable agent at boot:
-
-```
-systemctl --user enable --now gpg-agent.service
-```
-
-* Supply passphrase interactively once
- - Run:
-
-```
-gpg --decrypt conf/secrets/.env.gpg
-```
-
-* Enter the passphrase manually. gpg-agent caches it for 40 days. After this, systemd timers can run unattended without prompts.
-
-### Caching Behavior Explained
-
-* When you decrypt a file, gpg-agent caches the passphrase in memory.
-* Subsequent decrypts use the cached passphrase silently.
-* default-cache-ttl defines how long after last use the passphrase stays cached.
-* max-cache-ttl defines the absolute maximum lifetime.
-* For symmetric encryption, the same caching applies: decrypt once, and the passphrase is cached for the TTL.
-* Cache is lost on reboot unless you re-enter the passphrase.
-
-
-## Troubleshooting
-
-* Timers fail with decryption error: Check if gpg-agent cache expired. Re-run gpg --decrypt conf/secrets/.env.gpg to refresh.
-* After reboot: Cache is cleared. Supply passphrase interactively again.
-* Agent not running: Start with systemctl --user start gpg-agent.service.
-* TTL not applied: Verify ~/.gnupg/gpg-agent.conf and reload with gpgconf --reload gpg-agent.
-* Loopback fallback: If agent cannot cache, use --pinentry-mode loopback --passphrase-file /secure/path in scripts.
-* Check agent status: Run gpgconf --list-dirs agent-socket to confirm socket path, or gpg-connect-agent /bye to verify agent is active.
-* Reload agent manually: Use gpg-connect-agent reloadagent /bye to apply config changes immediately.
-* Preset passphrase manually: Use gpg-preset-passphrase --preset --passphrase <your-passphrase> <cache-key> for advanced scenarios (requires enabling allow-preset-passphrase in gpg-agent.conf).
-
-
-### Security Notes
-
-* Secrets are GPG-encrypted; decrypted only in memory.
-* Symmetric mode is simpler but requires secure passphrase handling.
-* Avoid set -x in scripts.
-* Always use HTTPS endpoints.
-
+*   `docs/Admin.md` for daily operations and troubleshooting.
+*   `docs/CRON.md` for BSD/cron scheduling.
+*   `docs/Releases.md` for release verification.

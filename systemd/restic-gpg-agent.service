@@ -1,0 +1,14 @@
+[Unit]
+Description=GPG Agent (root)
+
+[Service]
+Type=forking
+User=root
+Group=root
+Environment=GNUPGHOME=/root/.gnupg
+ExecStart=/usr/bin/gpg-agent --daemon --homedir /root/.gnupg
+ExecStop=/usr/bin/gpgconf --kill gpg-agent
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

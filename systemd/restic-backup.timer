@@ -1,9 +1,10 @@
 [Unit]
-Description=Run restic backup daily
+Description=Daily Restic backup
 
 [Timer]
-OnCalendar=daily
+OnCalendar=*-*-* 01:00:00
 Persistent=true
+Unit=restic-backup.service
 
 [Install]
 WantedBy=timers.target
