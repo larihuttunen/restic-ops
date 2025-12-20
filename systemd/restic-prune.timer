@@ -1,0 +1,10 @@
+[Unit]
+Description=Monthly Restic prune (heavy maintenance)
+
+[Timer]
+OnCalendar=Sun *-*-01 04:00:00
+Persistent=true
+UnitUnit=restic-prune.service
+
+[Install]
+

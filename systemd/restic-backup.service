@@ -1,9 +1,23 @@
 [Unit]
 Description=Restic backup
+Documentation=https://github.com/restic/restic
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/usr/local/bin/restic-ops
-ExecStart=/usr/local/bin/restic-ops/bin/backup.sh
+User=root
+Group=root
+Environment=GNUPGHOME=/root/.gnupg
+ExecStart=/usr/bin/env bash -lc 'cd /usr/local/bin/restic-ops && ./bin/backup.sh'
+
+# Hardening (adjust if needed)
+NoNewPrivileges=yes
+MemoryDenyWriteExecute=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadOnlyPaths=/usr/local/bin/restic-ops
+SyslogIdentifier=SyslogIdentifier=restic-backup
+
+[Install]
+

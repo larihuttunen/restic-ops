@@ -1,53 +1,117 @@
 # Roadmap
 
-This document outlines a rough roadmap for the project, starting at version 0.1.0. It is meant to guide development, align expectations, and set milestones while we flesh out features beyond the basic backup/restore/retention functionality currently provided by the scripts: common.sh, backup.sh, restore.sh, retention.sh.
+This roadmap tracks the evolution of **restic-ops** from the current `0.2.0-BETA` toward a stable `1.0.0`. It is operator‑centric, emphasizes security (no plaintext passphrases on disk), and prioritizes reliability under systemd.
 
-## Versioning and Milestones
-Use semantic versioning. Starting in the 0.x range signals early development; stable interfaces and backward compatibility come once we hit 1.0.0.
+Semantic versioning:
+- **MAJOR**: breaking changes to CLI or behavior
+- **MINOR**: new features, backwards compatible
+- **PATCH**: fixes or docs-only updates
 
-### 0.1.0 (Initial Alpha)
-- Baseline: implement basic backup, restore, retention. These are the scripts you see today and constitute the starting point.
+---
 
-### 0.2.0 (Alpha → Beta Transition)
-- **List snapshots**: add a `list` subcommand or script to view existing backup IDs (`restic snapshots`).
-- Better documentation: expand README/Deployment, include usage examples for list, backup, restore, retention.
-- Basic error handling and input validation; handle common failure cases gracefully.
+## 0.1.0 (latest released version)
+**Goal:** Baseline backup/restore/retention with simple scripts.  
+Deliverables: `bin/backup.sh`, `bin/restore.sh`, `bin/retention.sh`, `bin/common.sh`.  
+Notes: Manual GPG passphrase handling; no systemd units or operator helpers.
 
-### 0.3.0 (Beta)
-- **Stats & Check**: wrap `restic stats` (or `restic snapshots --json` info) and `restic check` to report repository status and integrity.
-- Flexible retention: expose more restic `forget` options (keep-last, keep-hourly, etc.), customizable via command-line or config.
-- Pre/post hooks: allow user-defined commands to run before or after backups.
+---
 
-### 0.4.0 (Beta)
-- **Tagging support**: allow passing tags into backups and filtering snapshots by tag later (`restic tag add`, `restic snapshots --tag`).
-- Improved filtering of snapshots (by host, date, tag).
-- Possibly implement selective restore wrappers for easier file/directory extraction.
+## 0.2.0‑BETA (current branch: release/0.2.0-BETA)
+**Goal:** Non‑interactive automation via **interactive gpg‑agent cache** under systemd; operator helpers.  
+Deliverables:
+- Systemd units (repo-local): backup/retention/prune (+ optional gpg‑agent)
+- Helpers: `bin/list.sh`, `bin/stats.sh`, `bin/prune.sh`
+- Update‑safe configuration model: `/etc/restic-ops`
+- Docs: `docs/Deployment.md`, `docs/Admin.md`, `docs/CRON.md`
 
-### 0.5.0 (Release Candidate)
-- **Mount**: convenience wrapper to mount a restic repository (`restic mount`).
-- **Diff**: wrap `restic diff` for comparing two snapshots.
-- Consolidate and polish scripts: unify argument parsing, centralize common functionality more completely in `common.sh`.
-- Add automated tests (unit/integration or manual test checklists) and CI for quality assurance.
+**Acceptance:**
+- After priming the agent cache once, `restic-backup.service` & `restic-retention.service` run headless on test hosts.
+- `list`, `stats`, `prune` operate correctly with filters.
+- Documentation matches implementation.
 
-### 0.6.0 → 0.9.x (Final Beta → RC)**
-- Address user feedback from earlier betas. Fix bugs (patch bumps), refine the UI/UX (improved logging, color, prompts).
-- Tackle other restic capabilities: incremental backup tweaks, prune enhancements (e.g. dry-run mode), key management support (change passwords or keys), snapshots pruning beyond what the basic policy covers.
-- Explore optional features: cache management (`restic cache`), automatic snapshots tagging via timestamp/hostname patterns, integration with restic’s rest-server or other backends.
+---
 
-### 1.0.0 (Stable)
-- Polished, tested, documented and stable API. All planned features for the first generation delivered and working reliably.
-- Guarantee backward compatibility for the public interface (script names, arguments, meaning).
-- Revisit version bump to 1.0.0; from here on follow normal MAJOR.MINOR.PATCH lifecycle: new features → MINOR, bug fixes → PATCH, breaking changes → MAJOR.
+## 0.2.1 — Deployment & Enablement
+**Goal:** Make deployment repeatable and fast.  
+Deliverables:
+- `docs/deploy-0.2.md`: copy units, enable timers, prime cache, verify logs.
+- Optional deployment script/Ansible role.
+- Optional `EnvironmentFile=/etc/restic-ops/env` pattern for path overrides.
 
-## Other Potential Features & Enhancements
-- Interactive menus or basic TUI (text UI) for less experienced users: choose snapshots from a list in a friendly way.
-- Configuration file support: centralize defaults (repository path, retention rules, includes/excludes) in a config rather than environment variables only.
-- Logging improvements: rotate logs, configurable verbosity, logging to file or syslog.
-- Cross-platform support: test & adapt scripts for other shells or OSes if necessary (FreeBSD, macOS) and document portability considerations.
-- Docker images or containerized helpers for easier deployment.
-- Integration with other backup orchestration tools or scheduling frameworks beyond cron (systemd timers, Kubernetes CronJobs).
+**Acceptance:**
+- Fresh host setup ≤15 minutes, with a working first backup and visible timers.
 
-## Contributors & Feedback
-- Invite early users to try the various pre-releases and contribute feedback or code.
-- Track bugs, feature requests and priorities in issues or a project board.
+---
 
+## 0.2.2 — **Disaster Recovery (DR) v1: Runbook & Drill**
+**Goal:** Operators can restore fast, under pressure.  
+Deliverables:
+- `docs/DR.md`:
+  - **Recovery prerequisites** (GPG key/passphrase handling, agent priming)
+  - **Single-file restore** and **directory restore** workflows
+  - **Host‑level rebuild**: clean OS → install restic-ops → import config → restore `/etc` & critical paths
+  - **Key loss playbook** (what’s recoverable, what isn’t)
+- Testable examples using `bin/restore.sh` and `restic restore --target`.
+
+**Acceptance:**
+- DR **tabletop**: a new VM can be rebuilt from a blank state and restore `/etc` + at least one application directory using only `DR.md`.
+- Measured, repeatable **RTO** target documented (e.g., “RTO ≤ 60 min for `/etc` + app dir”).
+- Post‑mortem checklist template included in `docs/DR.md`.
+
+---
+
+## 0.3.0 — CLI consolidation & advanced ops
+**Goal:** Single entrypoint with consistent UX.  
+Deliverables:
+- `bin/ops` with subcommands: `backup | restore | list | stats | retention | prune | check`
+- Consistent flags, logging, exit codes; optional completions.
+
+**Acceptance:**
+- Existing scripts callable via `bin/ops` (or retained as shims).
+- `bin/ops <cmd> --help` is consistent; smoke tests green.
+
+---
+
+## 0.4.0 — Observability & quality
+**Goal:** Troubleshoot faster, scale confidently.  
+Deliverables:
+- Structured & human logs; syslog/file logging options.
+- CI lint/tests with a throwaway repo; basic integration flow.
+
+**Acceptance:**
+- CI gates PRs; failures include actionable context.
+
+---
+
+## 0.5.x — Key management & **DR v2: Evidence-based recovery**
+**Goal:** Hardening secrets & validating restores with checks.  
+Deliverables:
+- Passphrase rotation procedure (documented & rehearsed).
+- `bin/check.sh` for `restic check` & repository health.
+- Optional: TPM/HSM/KMS design spike.
+- DR **validation job**: scheduled `restic check` + sample restore to a scratch path; retention of validation logs.
+
+**Acceptance:**
+- Rotation procedure exercised successfully on a non-prod repo.
+- Periodic validation runs produce logs; errors alert operators.
+
+---
+
+## 0.6.x — DR v3: Automation & metrics
+**Goal:** Lower RTO/RPO, higher assurance.  
+Deliverables:
+- Optional automated **selective restore tests** with integrity checks.
+- Metrics surfaced (JSON logs from `list/stats/check`) for dashboards.
+- Optional: dry-run restore diffing vs. golden manifests.
+
+**Acceptance:**
+- At least one periodic auto-restore test runs and reports success metrics.
+
+---
+
+## 1.0.0 — Stable CLI/UX
+**Goal:** “It just works.”  
+Definition of Done:
+- Stable CLI contract & migration notes.
+- Complete docs: deploy, operate, **recover**, maintain, troubleshoot.
+- Backward compatibility within 1.x; breaking changes → MAJOR.
