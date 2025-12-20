@@ -147,6 +147,22 @@ rm /etc/restic-ops/restic.env.tmp
 
 ## 6. Troubleshooting
 
+### Removing Stale Locks
+
+If a backup job crashes (e.g., OOM kill, power loss) or is manually killed, the repository may remain "locked." Future jobs will fail with `Fatal: unable to create lock`.
+
+To unlock it, you can source the helper environment in a subshell:
+
+```sh
+(
+  . /usr/local/bin/restic-ops/bin/common.sh
+  load_secrets "$SECRETS"
+  echo "Unlocking $RESTIC_REPOSITORY..."
+  restic -r "$RESTIC_REPOSITORY" unlock
+)
+
+```
+
 ### Priming the GPG Agent
 
 The automated scripts rely on a cached GPG key in memory. If you reboot or restart `gpg-agent`, you must re-prime it.
@@ -181,3 +197,4 @@ If this prompts for a password or fails:
 
 * `docs/Deployment.md` for install/upgrade.
 * `docs/CRON.md` for BSD/cron scheduling.
+
