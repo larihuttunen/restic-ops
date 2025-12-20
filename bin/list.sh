@@ -3,7 +3,6 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/common.sh"
 
-SECRETS="$SCRIPT_DIR/../conf/secrets/restic.env.gpg"
 load_secrets "$SECRETS"
 require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 
@@ -12,9 +11,8 @@ TAG=""
 PATH_FILTER=""
 JSON=0
 GROUP_BY=""
+EXTRA_ARGS=""
 
-# Parse a few convenience flags; everything else is forwarded.
-ARGS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -H|--host)       HOST="$2"; shift 2 ;;
@@ -22,11 +20,9 @@ while [ $# -gt 0 ]; do
     -P|--path)       PATH_FILTER="$2"; shift 2 ;;
     -J|--json)       JSON=1; shift ;;
     --group-by)      GROUP_BY="$2"; shift 2 ;;
-    *)               ARGS="$ARGS $(printf '%s' "$1")"; shift ;;
+    *)               EXTRA_ARGS="$EXTRA_ARGS $1"; shift ;;
   esac
 done
-
-set -- $ARGS
 
 CMD="restic -r \"$RESTIC_REPOSITORY\" snapshots"
 [ -n "$HOST" ]       && CMD="$CMD --host \"$HOST\""
@@ -35,5 +31,4 @@ CMD="restic -r \"$RESTIC_REPOSITORY\" snapshots"
 [ -n "$GROUP_BY" ]   && CMD="$CMD --group-by \"$GROUP_BY\""
 [ "$JSON" -eq 1 ]    && CMD="$CMD --json"
 
-# shellcheck disable=SC2086
-eval
+eval "$CMD $EXTRA_ARGS"
