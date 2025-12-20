@@ -33,9 +33,11 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
 ## Installation Steps
 
 1. **Install dependencies.**
+
 1. **Download and verify the release:**
    - Download `restic-ops.run` and its `.asc` signature.
    - Verify with GPG (see Releases.md).
+
 1. **Extract the release:**
    ```sh
    mkdir -p /usr/local/lib/restic-ops/v0.2.0
@@ -47,6 +49,7 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
     ```sh
     ln -sfn /usr/local/lib/restic-ops/v0.2.0 /usr/local/bin/restic-ops
     ```
+
 1.  **Create persistent config:**
     ```sh
     mkdir -p /etc/restic-ops
@@ -55,12 +58,14 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
     vi /etc/restic-ops/include.txt
     vi /etc/restic-ops/exclude.txt
     ```
+
 1.  **Create and encrypt secrets:**
     ```sh
     vi /etc/restic-ops/restic.env
     gpg --symmetric --cipher-algo AES256 /etc/restic-ops/restic.env
     rm /etc/restic-ops/restic.env
     ```
+
 1.  **Prime gpg-agent cache (once per reboot/agent restart):**
     ```sh
     export GNUPGHOME=/root/.gnupg
