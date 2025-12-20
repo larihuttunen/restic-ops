@@ -1,71 +1,67 @@
-# Quick Start
+# restic-ops
 
-This repository now uses a **single-profile** workflow. Everything you need for backups lives in one encrypted file and a few helper scripts.
+**Robust, operator-friendly wrappers for Restic backups.**
+Focused on security, automation (systemd/cron), and ease of recovery.
 
-## Secrets
-Create `conf/secrets/restic.env` with:
+## Features
+- **Multi-Cloud Support:** Fully compatible with all Restic backends.
+  - ✅ **Tested & Verified:** AWS S3, Azure Blob Storage, Backblaze B2.
+  - *Also supports: SFTP, REST Server, Google Cloud, local disk, etc.*
+- **Secure by Default:** No plaintext passwords on disk; uses GPG-encrypted secrets.
+- **Automated:** Ready-to-use systemd units (timers/services) for backup, prune, and retention.
+- **Operator-Centric:** Helper scripts for stats, listing snapshots, and unified logging.
+- **Portable:** Runs on Linux (systemd) and BSD/macOS (cron).
+
+---
+
+## Quick Start (Linux/systemd)
+
+For the full detailed guide, see [docs/Deployment.md](docs/Deployment.md).
+
+### 1. Install & Configure
+Download the latest release (or clone source) to `/usr/local/bin/restic-ops`.
+
+1.  **Create Configuration Directory:**
+    ```sh
+    mkdir -p /etc/restic-ops
+    ```
+
+2.  **Define Include/Exclude Rules:**
+    Copy samples and edit to fit your needs.
+    ```sh
+    cp conf/include.sample.txt /etc/restic-ops/include.txt
+    cp conf/exclude.sample.txt /etc/restic-ops/exclude.txt
+    ```
+
+3.  **Setup Encrypted Secrets:**
+    Create a temporary `restic.env` file with your credentials (repo URL, passwords, S3/Azure keys).
+    ```sh
+    # Edit your secrets
+    vi /etc/restic-ops/restic.env
+
+    # Encrypt it (AES256) and remove the plaintext
+    gpg --symmetric --cipher-algo AES256 /etc/restic-ops/restic.env
+    rm /etc/restic-ops/restic.env
+    ```
+
+### 2. Initialize
+1.  **Prime the GPG Agent:** (Required once per reboot/session)
+    ```sh
+    export GNUPGHOME=/root/.gnupg
+    gpg -d /etc/restic-ops/restic.env.gpg >/dev/null
+    ```
+
+2.  **Initialize the Repo & Run First Backup:**
+    ```sh
+    /usr/local/bin/restic-ops/bin/init.sh
+    /usr/local/bin/restic-ops/bin/backup.sh
+    ```
+
+### 3. Automate
+Enable the provided systemd timers for daily backups and weekly retention.
 
 ```sh
-# Repository: choose one backend
-export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/path"
-# Or for Azure:
-export RESTIC_REPOSITORY="azure:your-container-name:optional/prefix"
-
-# Restic repository password
-export RESTIC_PASSWORD="super-secret-password"
-
-# S3 credentials
-export AWS_ACCESS_KEY_ID="..."
-export AWS_SECRET_ACCESS_KEY="..."
-
-# Azure credentials
-export AZURE_ACCOUNT_NAME="..."
-export AZURE_ACCOUNT_KEY="..."
-# Optional: export AZURE_SAS_TOKEN="..."
-
-# Optional: central cache directory
-export RESTIC_CACHE_DIR="/var/cache/restic"
+cp systemd/restic-*.service systemd/restic-*.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now restic-backup.timer restic-retention.timer restic-prune.timer
 ```
-
-Encrypt and remove plaintext:
-
-```sh
-gpg --symmetric --cipher-algo AES256 conf/secrets/restic.env
-rm conf/secrets/restic.env
-```
-
-## Scripts
-- `bin/common.sh`: logging, decrypt secrets, validate env.
-- `bin/backup.sh`, `bin/restore.sh`, `bin/retention.sh`: load secrets and run restic.
-
-## Systemd Units
-Timers and services for:
-- Daily backup (`restic-backup.timer` / `restic-backup.service`)
-- Weekly retention (`restic-retention.timer` / `restic-retention.service`)
-- Weekly cache cleanup (`restic-cache-clean.timer` / `restic-cache-clean.service`)
-
-## Quickstart Steps
-
-1. Clone the repo:
-    ```sh
-    git clone <your-repo-url>
-    cd <your-repo-dir>
-    ```
-2. Populate `conf/secrets/restic.env` with your values (using the template above) and encrypt it as shown.
-3. Adjust your include/exclude lists in `conf/include.txt` and `conf/exclude.txt`.
-4. Make the scripts executable:
-    ```sh
-    chmod +x bin/*.sh
-    ```
-5. Copy systemd units and enable the timers:
-    ```sh
-    sudo cp systemd/*.service systemd/*.timer /etc/systemd/system/
-    sudo systemctl daemon-reload
-    sudo systemctl enable --now restic-backup.timer restic-retention.timer restic-cache-clean.timer
-    ```
-6. Check status:
-    ```sh
-    systemctl list-timers | grep restic
-    ```
-
-For full details and advanced configuration see the [Deployment Guide](docs/Deployment.md).
