@@ -26,11 +26,11 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ## 🚧 In Progress: v0.2.x — Deployment & Hardening
 
-### v0.2.1 — Streamlined Deployment (Current Focus)
-**Goal:** Make installation fast, repeatable, and less error-prone.
-- [ ] **Installer Script:** A `install.sh` helper that automates directory creation, symlinking, and permission checks.
-- [ ] **Validation:** `bin/check-config.sh` to verify GPG agent status and config syntax before running jobs.
-- [ ] **Docs:** Finalize `docs/Deployment.md` with "copy-paste" friendly steps.
+### v0.2.1 — Documentation & Reliability Polish (Current Focus)
+**Goal:** Ensure the manual deployment process is frictionless and the existing scripts are robust.
+- [ ] **Docs:** Finalize `docs/Deployment.md` with tested, copy-paste friendly steps (verified on fresh VM).
+- [ ] **Docs:** Expand `docs/Admin.md` with restoration examples and service management.
+- [ ] **Polish:** Ensure error messages in `common.sh` clearly indicate when GPG agent priming is missing.
 
 ### v0.2.2 — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
@@ -42,24 +42,19 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ## 🔮 Future Milestones
 
-### v0.3.0 — The Unified CLI (`ops`)
-**Goal:** Replace loose scripts with a single, cohesive entry point.
-- Consolidate `bin/*.sh` into a single tool: `ops backup`, `ops restore`, `ops status`.
-- Consistent flag parsing and logging across all commands.
-- **Self-Update:** `ops update` to pull the latest signed release.
+### v0.3.0 — Health & Observability
+**Goal:** Proactive monitoring and repository integrity without a monolithic CLI.
+- **Health Check:** `bin/check.sh` wrapper for `restic check` with parsing for alerting.
+- **Metrics:** `bin/stats.sh --prometheus` or JSON output formatted for monitoring agents (Zabbix/Datadog).
+- **Notifications:** Simple webhook integration (e.g., `bin/notify.sh` or common hook) for failure alerts.
 
-### v0.4.0 — Health & Observability
-**Goal:** Proactive monitoring.
-- **Health Check:** `ops check` wrapper for `restic check` with parsing for alerting.
-- **Metrics:** `ops stats --prometheus` or JSON output formatted for monitoring agents (Zabbix/Datadog).
-- **Notifications:** Simple webhook support (Slack/Discord/Email) on failure.
-
-### v0.5.0 — Hardening & Policy
-- **Key Rotation:** Automated re-encryption of `restic.env.gpg`.
+### v0.4.0 — Hardening & Policy
+**Goal:** Advanced security features.
+- **Key Rotation:** Procedure or script to automated re-encryption of `restic.env.gpg`.
 - **Multiple Repos:** Support for syncing to a secondary remote (e.g., local NAS + S3).
 - **Immutable Backups:** Documentation/setup for Object Lock (S3) or Append-Only modes.
 
 ### v1.0.0 — Stable Release
-- API/CLI stability guarantee.
+- API/Interface stability guarantee.
 - Full test coverage (CI/CD integration).
 - Complete documentation suite (Install, Admin, Recovery, Architecture).
