@@ -3,7 +3,6 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/common.sh"
 
-SECRETS="$SCRIPT_DIR/../conf/secrets/restic.env.gpg"
 load_secrets "$SECRETS"
 require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 
