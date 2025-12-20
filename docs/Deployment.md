@@ -40,14 +40,14 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
 
 1. **Extract the release:**
    ```sh
-   mkdir -p /usr/local/lib/restic-ops/v0.2.0
-   cd /usr/local/lib/restic-ops/v0.2.0
+   mkdir -p /usr/local/lib/restic-ops/vN.N.N
+   cd /usr/local/lib/restic-ops/vN.N.N
    /path/to/restic-ops.run
    ```
 
 1.  **Symlink current version:**
     ```sh
-    ln -sfn /usr/local/lib/restic-ops/v0.2.0 /usr/local/bin/restic-ops
+    ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
     ```
 
 1.  **Create persistent config:**

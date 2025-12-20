@@ -12,7 +12,7 @@ set -eu
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/common.sh"
 
-SECRETS="$SCRIPT_DIR/../conf/secrets/restic.env.gpg"
+SECRETS="$CONF_DIR/restic.env.gpg"
 load_secrets "$SECRETS"
 require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 
@@ -58,9 +58,9 @@ Other:
 
 Examples:
   bin/stats.sh --mode restore-size
-  bin/stats.sh -H nessus -T critical --since 30d --mode raw-data
+  bin/stats.sh -H host1 -T critical --since 30d --mode raw-data
   bin/stats.sh --latest       # stats for very latest snapshot (any host)
-  bin/stats.sh -H ti-hub --latest 3 --mode restore-size
+  bin/stats.sh -H host2 --latest 3 --mode restore-size
   bin/stats.sh --snapshot 1234abcd --snapshot deadbeef --json --summary
 USAGE
 }
@@ -189,4 +189,5 @@ if [ $SUMMARY -eq 1 ] && command -v jq >/dev/null 2>&1; then
   else
     # Heuristic: try to pull numbers from the text output (not guaranteed across restic versions).
     printf '\n(For a reliable summary, add --json --summary when jq is installed.)\n'
-   fi
+  fi
+fi
