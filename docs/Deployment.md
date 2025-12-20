@@ -41,7 +41,7 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
    mkdir -p /usr/local/lib/restic-ops/v0.2.0
    cd /usr/local/lib/restic-ops/v0.2.0
    /path/to/restic-ops.run
-````
+   ```
 
 4.  **Symlink current version:**
     ```sh
