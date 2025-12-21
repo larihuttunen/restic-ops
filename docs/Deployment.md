@@ -69,14 +69,15 @@ rm /etc/restic-ops/restic.env
 
 * **Configure GPG Agent Persistence (40-Day Cache):**
 To ensure headless backups work for extended periods without manual intervention, configure the GPG agent to cache the passphrase for 40 days ( seconds).
-**a. Configure TTL:**
+
+- **Configure TTL:**
 Edit `/root/.gnupg/gpg-agent.conf`:
 ```ini
 default-cache-ttl 3456000
 max-cache-ttl 3456000
 ```
 
-**b. Restart Agent:**
+- **Restart Agent:**
 ```sh
 gpgconf --kill gpg-agent
 ```
