@@ -54,7 +54,7 @@ load_secrets() {
 }
 
 ###############################################################################
-# Env requirement checker (FIXED: Removed Bash-specific ! substitution)
+# Env requirement checker
 ###############################################################################
 require_env() {
   MISSING=0
