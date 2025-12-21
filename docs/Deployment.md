@@ -31,28 +31,25 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
 
 ## Installation Steps
 
-1. **Install dependencies.**
+* **Install dependencies.**
 
-1. **Download and verify the release:**
-   - Download `restic-ops.run` and its `.asc` signature.
-   - Verify with GPG (see Releases.md).
+* **Download and verify the release:**
+- Download `restic-ops.run` and its `.asc` signature.
+- Verify with GPG (see Releases.md).
 
-1. **Extract the release:**
-   ```sh
-   mkdir -p /usr/local/lib/restic-ops/vN.N.N
-   cd /usr/local/lib/restic-ops/vN.N.N
-   /path/to/restic-ops.run
-
+* **Extract the release:**
+```sh
+mkdir -p /usr/local/lib/restic-ops/vN.N.N
+cd /usr/local/lib/restic-ops/vN.N.N
+/path/to/restic-ops.run
 ```
 
-1. **Symlink current version:**
+* **Symlink current version:**
 ```sh
 ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
-
 ```
 
-
-2. **Create persistent config:**
+* **Create persistent config:**
 ```sh
 mkdir -p /etc/restic-ops
 cp /usr/local/bin/restic-ops/conf/*.txt /etc/restic-ops/
@@ -61,7 +58,7 @@ vi /etc/restic-ops/exclude.txt
 ```
 
 
-3. **Create and encrypt secrets:**
+* **Create and encrypt secrets:**
 ```sh
 cp /usr/local/bin/restic-ops/conf/secrets/restic.env /etc/restic-ops/restic.env
 vi /etc/restic-ops/restic.env
@@ -70,32 +67,26 @@ rm /etc/restic-ops/restic.env
 ```
 
 
-4. **Configure GPG Agent Persistence (40-Day Cache):**
+* **Configure GPG Agent Persistence (40-Day Cache):**
 To ensure headless backups work for extended periods without manual intervention, configure the GPG agent to cache the passphrase for 40 days ( seconds).
-**a. Configure TTL:**
+
+- **Configure TTL:**
 Edit `/root/.gnupg/gpg-agent.conf`:
 ```ini
 default-cache-ttl 3456000
 max-cache-ttl 3456000
-
 ```
 
-
-**b. Restart Agent:**
+- **Restart Agent:**
 ```sh
 gpgconf --kill gpg-agent
-
 ```
 
-
-5. **Prime gpg-agent cache:**
+* **Prime gpg-agent cache:**
 Run the helper script to interactively cache your passphrase. You will need to run this once every 40 days (or after a reboot).
 ```sh
 /usr/local/bin/restic-ops/bin/prime-gpg.sh
-
 ```
-
-
 
 ## Initial Setup
 

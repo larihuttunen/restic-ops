@@ -44,6 +44,11 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - [x] Cron job validation
 - [x] Deployment simplification.
 
+### v0.2.4 Manual Use Case
+**Goal:** Support a manual retention cycle.
+- [x] Make retention.sh support manual retention.
+- [x] Document manual retention example in Admin.md
+
 ### v0.2.x — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
 - [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).
