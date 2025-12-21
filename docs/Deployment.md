@@ -55,8 +55,8 @@ ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 2. **Create persistent config:**
 ```sh
 mkdir -p /etc/restic-ops
-cp /usr/local/bin/restic-ops/conf/include.sample.txt /etc/restic-ops/include.txt
-cp /usr/local/bin/restic-ops/conf/exclude.sample.txt /etc/restic-ops/exclude.txt
+cp /usr/local/bin/restic-ops/conf/include.txt /etc/restic-ops/include.txt
+cp /usr/local/bin/restic-ops/conf/exclude.txt /etc/restic-ops/exclude.txt
 vi /etc/restic-ops/include.txt
 vi /etc/restic-ops/exclude.txt
 
@@ -65,10 +65,10 @@ vi /etc/restic-ops/exclude.txt
 
 3. **Create and encrypt secrets:**
 ```sh
+cp /usr/local/bin/restic-ops/conf/secrets/restic.env /etc/restic-ops/restic.env
 vi /etc/restic-ops/restic.env
 gpg --symmetric --cipher-algo AES256 /etc/restic-ops/restic.env
 rm /etc/restic-ops/restic.env
-
 ```
 
 
