@@ -55,11 +55,9 @@ ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 2. **Create persistent config:**
 ```sh
 mkdir -p /etc/restic-ops
-cp /usr/local/bin/restic-ops/conf/include.txt /etc/restic-ops/include.txt
-cp /usr/local/bin/restic-ops/conf/exclude.txt /etc/restic-ops/exclude.txt
+cp /usr/local/bin/restic-ops/conf/*.txt /etc/restic-ops/
 vi /etc/restic-ops/include.txt
 vi /etc/restic-ops/exclude.txt
-
 ```
 
 
