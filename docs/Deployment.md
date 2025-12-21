@@ -34,21 +34,20 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
 1. **Install dependencies.**
 
 1. **Download and verify the release:**
-   - Download `restic-ops.run` and its `.asc` signature.
-   - Verify with GPG (see Releases.md).
+- Download `restic-ops.run` and its `.asc` signature.
+- Verify with GPG (see Releases.md).
 
 1. **Extract the release:**
-   ```sh
-   mkdir -p /usr/local/lib/restic-ops/vN.N.N
-   cd /usr/local/lib/restic-ops/vN.N.N
-   /path/to/restic-ops.run
-   ```
+```sh
+mkdir -p /usr/local/lib/restic-ops/vN.N.N
+cd /usr/local/lib/restic-ops/vN.N.N
+/path/to/restic-ops.run
+```
 
 1. **Symlink current version:**
-    ```sh
-    ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
-
-    ```
+```sh
+ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
+```
 
 1. **Create persistent config:**
 ```sh
