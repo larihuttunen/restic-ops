@@ -10,4 +10,5 @@ GNUPGHOME=/root/.gnupg
 30 3 * * 0 root /usr/local/bin/restic-ops/bin/retention.sh >> /var/log/restic-retention.log 2>&1
 
 # Monthly prune (first Sunday 04:00)
-0 4 * * 0 root test $(date +\%d) -le 07 && /usr/local/bin/restic-ops/bin/prune
+# Fixed: Added .sh extension and ensured path matches implementation
+0 4 * * 0 root test $(date +\%d) -le 07 && /usr/local/bin/restic-ops/bin/prune.sh >> /var/log/restic-prune.log 2>&1
