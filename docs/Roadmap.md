@@ -41,8 +41,8 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ### v0.2.3 OpenBSD Functional
 **Goal:** Make sure that the releease works on OpenBSD
-- [ ] Cron job validation
-- [ ] Deployment simplification.
+- [x] Cron job validation
+- [x] Deployment simplification.
 
 ### v0.2.x — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
