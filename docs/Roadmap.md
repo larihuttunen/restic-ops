@@ -28,11 +28,17 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ### v0.2.1 — Documentation & Reliability Polish (Current Focus)
 **Goal:** Ensure the manual deployment process is frictionless and the existing scripts are robust.
-- [ ] **Docs:** Finalize `docs/Deployment.md` with tested, copy-paste friendly steps (verified on fresh VM).
-- [ ] **Docs:** Expand `docs/Admin.md` with restoration examples, service management, and **lock removal** (`restic unlock` guidance).
-- [ ] **Polish:** Ensure error messages in `common.sh` clearly indicate when GPG agent priming is missing.
+- [x] **Docs:** Finalize `docs/Deployment.md` with tested, copy-paste friendly steps (verified on fresh VM).
+- [x] **Docs:** Expand `docs/Admin.md` with restoration examples, service management, and **lock removal** (`restic unlock` guidance).
+- [x] **Polish:** Ensure error messages in `common.sh` clearly indicate when GPG agent priming is missing.
 
-### v0.2.2 — Disaster Recovery (DR) Drills
+### v0.2.2 Test on OpenBSD
+**Goal:** Make sure that the releease works on OpenBSD
+- [ ] **restic-ops-run**: Tar vs. gtar compatibility.
+- [ ] **POSIX** compliance for scripts.
+- [ ] **Cron** setup works.
+
+### v0.2.3 — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
 - [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).
 - [ ] **Mount Helper:** `bin/mount.sh` wrapper to browse snapshots interactively (FUSE) for single-file recovery.
