@@ -46,6 +46,7 @@ Configuration is always in `/etc/restic-ops` and is never overwritten by upgrade
 ```
 
 1. **Symlink current version:**
+
 ```sh
 ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 
