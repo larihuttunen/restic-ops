@@ -35,7 +35,8 @@ jobs:
           set -e
           printf 'Extracting restic-ops...\n'
           ARCHIVE_LINE=$(awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' "$0")
-          tail -n +${ARCHIVE_LINE} "$0" | tar xz
+          # Use "zf -" to be compatible with OpenBSD tar and specify gzip compression
+          tail -n +${ARCHIVE_LINE} "$0" | tar xzf -
           exit 0
           __ARCHIVE_BELOW__
           EOF
