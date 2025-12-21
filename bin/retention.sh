@@ -11,7 +11,7 @@ KEEP_MONTHLY="${KEEP_MONTHLY:-24}"
 KEEP_YEARLY="${KEEP_YEARLY:-4}"
 
 log "Applying retention to $RESTIC_REPOSITORY (daily=$KEEP_DAILY monthly=$KEEP_MONTHLY yearly=$KEEP_YEARLY)"
-restic forget --keep-daily "$KEEP_DAILY" --keep-monthly "$KEEP_MONTHLY" --keep-yearly "$KEEP_YEARLY" --prune
+restic forget --keep-daily "$KEEP_DAILY" --keep-monthly "$KEEP_MONTHLY" --keep-yearly "$KEEP_YEARLY"
 RC=$?
 [ "$RC" -eq 0 ] || { log "ERROR: retention failed (rc=$RC)"; exit "$RC"; }
 log "Retention completed"
