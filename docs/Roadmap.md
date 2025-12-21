@@ -44,7 +44,7 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - [x] Cron job validation
 - [x] Deployment simplification.
 
-### v0.2.4 Manual Use Case
+### v0.2.5 Manual Use Case
 **Goal:** Support a manual retention cycle.
 - [x] Make retention.sh support manual retention.
 - [x] Document manual retention example in Admin.md
