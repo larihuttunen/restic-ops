@@ -37,6 +37,7 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - [ ] **restic-ops-run**: Tar vs. gtar compatibility.
 - [ ] **POSIX** compliance for scripts.
 - [ ] **Cron** setup works.
+- [ ] **prime-gpg.sh** helper script for GPG secret priming.
 
 ### v0.2.3 — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
