@@ -39,7 +39,12 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - [x] **Cron** setup works.
 - [x] **prime-gpg.sh** helper script for GPG secret priming.
 
-### v0.2.3 — Disaster Recovery (DR) Drills
+### v0.2.3 OpenBSD Functional
+**Goal:** Make sure that the releease works on OpenBSD
+- [x] Cron job validation
+- [x] Deployment simplification.
+
+### v0.2.x — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
 - [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).
 - [ ] **Mount Helper:** `bin/mount.sh` wrapper to browse snapshots interactively (FUSE) for single-file recovery.
