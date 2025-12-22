@@ -102,6 +102,6 @@ systemctl enable --now restic-backup.timer restic-retention.timer restic-prune.t
 
 * **[Deployment Guide](docs/Deployment.md):** Full installation, directory layout, and upgrade steps.
 * **[Operations & Troubleshooting](docs/Admin.md):** Daily management commands.
-* **[Cron/BSD Guide](docs/CRON.md):** Scheduling without systemd.
+* **[Cron/BSD Guide](cron/README.md):** Scheduling without systemd.
 * **[Roadmap](docs/Roadmap.md):** Future plans and version history.
 
