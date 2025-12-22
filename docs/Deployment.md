@@ -21,7 +21,7 @@ Configuration is always stored in `/etc/restic-ops` and is never overwritten by 
 
 ## Directory Layout
 
-* **Code (versioned):** `/usr/local/lib/restic-ops/v0.2.1/`
+* **Code (versioned):** `/usr/local/lib/restic-ops/vN.N.N/`
 * **Symlink:** `/usr/local/bin/restic-ops` → current version
 * **Config (persistent):** `/etc/restic-ops/`
     * `include.txt`
@@ -39,8 +39,8 @@ Download the latest self-extracting installer (`restic-ops.run`) and its signatu
 Create a versioned directory and run the self-extractor.
 
 ```sh
-mkdir -p /usr/local/lib/restic-ops/v0.2.1
-cd /usr/local/lib/restic-ops/v0.2.1
+mkdir -p /usr/local/lib/restic-ops/vN.N.N
+cd /usr/local/lib/restic-ops/vN.N.N
 sh /path/to/restic-ops.run
 
 ```
@@ -50,7 +50,7 @@ sh /path/to/restic-ops.run
 Link the new version to the system path.
 
 ```sh
-ln -sfn /usr/local/lib/restic-ops/v0.2.1 /usr/local/bin/restic-ops
+ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 
 ```
 
@@ -172,14 +172,14 @@ systemctl enable --now restic-prune.timer
 
 ### Install New Version
 
-Extract the new release to a new versioned directory (e.g., `v0.2.2`).
+Extract the new release to a new versioned directory (e.g., `v0.2.6`).
 
 ### Switch Symlink
 
 Point the global symlink to the new version.
 
 ```sh
-ln -sfn /usr/local/lib/restic-ops/v0.2.2 /usr/local/bin/restic-ops
+ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 
 ```
 
