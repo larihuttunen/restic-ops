@@ -1,5 +1,5 @@
 [Unit]
-Description=Restic retention
+Description=Restic retention policy (forget old snapshots)
 After=network-online.target
 Wants=network-online.target
 
@@ -8,14 +8,12 @@ Type=oneshot
 User=root
 Group=root
 Environment=GNUPGHOME=/root/.gnupg
-ExecStart=/usr/bin/env bash -lc 'cd /usr/local/bin/restic-ops && ./bin/retention.sh'
+
+ExecStart=/usr/local/bin/restic-ops/bin/retention.sh
 
 NoNewPrivileges=yes
 MemoryDenyWriteExecute=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ReadOnlyPaths=/usr/local/bin/restic-ops
-SysSyslogIdentifier=restic-retention
-
-[Install]
-
+SyslogIdentifier=restic-retention

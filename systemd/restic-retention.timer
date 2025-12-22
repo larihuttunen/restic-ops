@@ -2,10 +2,10 @@
 Description=Weekly Restic retention
 
 [Timer]
+# Run Sundays at 03:00
 OnCalendar=Sun *-*-* 03:00:00
 Persistent=true
 Unit=restic-retention.service
 
 [Install]
-WantedBy=timers
-
+WantedBy=timers.target

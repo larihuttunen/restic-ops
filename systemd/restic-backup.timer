@@ -2,6 +2,7 @@
 Description=Daily Restic backup
 
 [Timer]
+# Run every day at 01:00
 OnCalendar=*-*-* 01:00:00
 Persistent=true
 Unit=restic-backup.service

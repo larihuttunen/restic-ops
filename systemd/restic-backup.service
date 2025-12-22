@@ -8,16 +8,17 @@ Wants=network-online.target
 Type=oneshot
 User=root
 Group=root
+# Essential for GPG agent socket discovery
 Environment=GNUPGHOME=/root/.gnupg
-ExecStart=/usr/bin/env bash -lc 'cd /usr/local/bin/restic-ops && ./bin/backup.sh'
 
-# Hardening (adjust if needed)
+# Direct execution via the symlink
+ExecStart=/usr/local/bin/restic-ops/bin/backup.sh
+
+# Security Hardening
 NoNewPrivileges=yes
 MemoryDenyWriteExecute=yes
 PrivateTmp=yes
 ProtectSystem=strict
+# Allow read access to the tool itself
 ReadOnlyPaths=/usr/local/bin/restic-ops
-SyslogIdentifier=SyslogIdentifier=restic-backup
-
-[Install]
-
+SyslogIdentifier=restic-backup
