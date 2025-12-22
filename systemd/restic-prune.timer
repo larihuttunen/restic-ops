@@ -1,19 +1,11 @@
 [Unit]
-Description=Restic prune (repository compaction)
-# Ensure we don't prune while retention is calculating
-After=restic-retention.service
+Description=Monthly Restic prune (heavy maintenance)
 
-[Service]
-Type=oneshot
-User=root
-Group=root
-Environment=GNUPGHOME=/root/.gnupg
+[Timer]
+# Run on the first Sunday of the month (Days 1-7) at 04:00
+OnCalendar=Sun *-*-01..07 04:00:00
+Persistent=true
+Unit=restic-prune.service
 
-ExecStart=/usr/local/bin/restic-ops/bin/prune.sh
-
-NoNewPrivileges=yes
-MemoryDenyWriteExecute=yes
-PrivateTmp=yes
-ProtectSystem=strict
-ReadOnlyPaths=/usr/local/bin/restic-ops
-SyslogIdentifier=restic-prune
+[Install]
+WantedBy=timers.target
