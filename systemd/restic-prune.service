@@ -1,5 +1,6 @@
 [Unit]
 Description=Restic prune (repository compaction)
+# Ensure we don't prune while retention is calculating
 After=restic-retention.service
 
 [Service]
@@ -7,6 +8,7 @@ Type=oneshot
 User=root
 Group=root
 Environment=GNUPGHOME=/root/.gnupg
+
 ExecStart=/usr/local/bin/restic-ops/bin/prune.sh
 
 NoNewPrivileges=yes
@@ -15,6 +17,3 @@ PrivateTmp=yes
 ProtectSystem=strict
 ReadOnlyPaths=/usr/local/bin/restic-ops
 SyslogIdentifier=restic-prune
-
-[Install]
-WantedBy=multi-user.target

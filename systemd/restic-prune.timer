@@ -2,9 +2,10 @@
 Description=Monthly Restic prune (heavy maintenance)
 
 [Timer]
-OnCalendar=Sun *-*-01 04:00:00
+# Run on the first Sunday of the month (Days 1-7) at 04:00
+OnCalendar=Sun *-*-01..07 04:00:00
 Persistent=true
-UnitUnit=restic-prune.service
+Unit=restic-prune.service
 
 [Install]
-
+WantedBy=timers.target

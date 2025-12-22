@@ -19,14 +19,13 @@ Below are example lines for a root crontab (`crontab -e` as root), matching the 
 GNUPGHOME=/root/.gnupg
 
 # Daily backup at 02:00
-0 2 * * * /usr/local/bin/restic-ops/bin/backup.sh >> /var/log/restic-backup.log 2>&1
+0 2 * * * /usr/local/bin/restic-ops/bin/backup.sh
 
 # Weekly retention on Sunday at 03:30
-30 3 * * 0 /usr/local/bin/restic-ops/bin/retention.sh >> /var/log/restic-retention.log 2>&1
+30 3 * * 0 /usr/local/bin/restic-ops/bin/retention.sh
 
 # Monthly prune (first Sunday at 04:00)
-# Note: % must be escaped as \% in crontabs to avoid being interpreted as a newline
-0 4 * * 0 [ $(date +\%d) -le 07 ] && /usr/local/bin/restic-ops/bin/prune.sh >> /var/log/restic-prune.log 2>&1
+0 4 * * 0 [ $(date +\%d) -le 07 ] && /usr/local/bin/restic-ops/bin/prune.sh
 
 ```
 
