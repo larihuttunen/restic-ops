@@ -4,11 +4,10 @@
 GNUPGHOME=/root/.gnupg
 
 # Daily backup at 02:00
-0 2 * * * root /usr/local/bin/restic-ops/bin/backup.sh >> /var/log/restic-backup.log 2>&1
+0 2 * * * /usr/local/bin/restic-ops/bin/backup.sh
 
 # Weekly retention (Sunday 03:30)
-30 3 * * 0 root /usr/local/bin/restic-ops/bin/retention.sh >> /var/log/restic-retention.log 2>&1
+30 3 * * 0 /usr/local/bin/restic-ops/bin/retention.sh
 
 # Monthly prune (first Sunday 04:00)
-# Fixed: Added .sh extension and ensured path matches implementation
-0 4 * * 0 root test $(date +\%d) -le 07 && /usr/local/bin/restic-ops/bin/prune.sh >> /var/log/restic-prune.log 2>&1
+0 4 * * 0 test $(date +\%d) -le 07 && /usr/local/bin/restic-ops/bin/prune.sh
