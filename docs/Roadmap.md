@@ -34,11 +34,28 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ### v0.2.2 Test on OpenBSD
 **Goal:** Make sure that the releease works on OpenBSD
-- [ ] **restic-ops-run**: Tar vs. gtar compatibility.
-- [ ] **POSIX** compliance for scripts.
-- [ ] **Cron** setup works.
+- [x] **restic-ops-run**: Tar vs. gtar compatibility.
+- [x] **POSIX** compliance for scripts.
+- [x] **Cron** setup works.
+- [x] **prime-gpg.sh** helper script for GPG secret priming.
 
-### v0.2.3 — Disaster Recovery (DR) Drills
+### v0.2.3 OpenBSD Functional
+**Goal:** Make sure that the releease works on OpenBSD
+- [x] Cron job validation
+- [x] Deployment simplification.
+
+### v0.2.5 Manual Use Case
+**Goal:** Support a manual retention cycle.
+- [x] Make retention.sh support manual retention.
+- [x] Document manual retention example in Admin.md
+
+### v0.2.6 Cron and Systemd Timers
+**Goal:** Ensure that automation works.
+- [x] Rework the cron jobs to follow the model on OpenBSD.
+- [x] Align the systemd services and timers with the current implementation.
+- [x] Align the documentation.
+
+### v0.2.x — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
 - [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).
 - [ ] **Mount Helper:** `bin/mount.sh` wrapper to browse snapshots interactively (FUSE) for single-file recovery.
