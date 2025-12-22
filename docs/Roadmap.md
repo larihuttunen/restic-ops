@@ -49,12 +49,6 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - [x] Make retention.sh support manual retention.
 - [x] Document manual retention example in Admin.md
 
-### v0.2.6 Cron and Systemd Timers
-**Goal:** Ensure that automation works.
-- [x] Rework the cron jobs to follow the model on OpenBSD.
-- [x] Align the systemd services and timers with the current implementation.
-- [x] Align the documentation.
-
 ### v0.2.x — Disaster Recovery (DR) Drills
 **Goal:** Ensure operators can restore data when the house is on fire.
 - [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).

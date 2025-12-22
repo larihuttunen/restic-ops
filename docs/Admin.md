@@ -191,6 +191,22 @@ If this prompts for a password or fails:
 2. Ensure you have "primed" the cache (step above).
 3. Check `pinentry-mode loopback` settings if applicable.
 
+## 7. Manual Use Case
+
+For personal computers such as laptops, which are not always online, you can add a manual
+retention cycle through /etc/restic-ops/restic.env. This will keep at least five last
+backups but make sure that the backups are temporally spaced through the daily, monthly,
+yearly cycle. In other words, if you make 10 backups during a week, more are kept
+through the weekly etc. retention cycles.
+
+```
+export KEEP_LAST=5
+export KEEP_DAILY=7
+export KEEP_WEEKLY=4
+export KEEP_MONTHLY=12
+export KEEP_YEARLY=2
+```
+
 ---
 
 ## See also
