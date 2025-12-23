@@ -5,7 +5,7 @@ Assume you are working as root (`sudo su -`) and the tools are installed at `/us
 
 ---
 
-## 1. Service Status (Systemd)
+## Service Status (Systemd)
 
 Check the status of automated timers and recent job runs.
 
@@ -31,7 +31,7 @@ systemctl start restic-backup.service
 
 ---
 
-## 2. Inspecting Repository
+## Inspecting Repository
 
 ### Listing Snapshots
 
@@ -67,7 +67,7 @@ bin/stats.sh --latest --json --summary
 
 ---
 
-## 3. Restoration
+## Restoration
 
 To restore data, use the `restore.sh` wrapper. You need a **snapshot ID** (find one using `list.sh`) and a **target directory**.
 
@@ -87,7 +87,7 @@ bin/restore.sh latest /tmp/restore-file --include "/etc/hosts"
 
 ---
 
-## 4. Manual Maintenance
+## Manual Maintenance
 
 While systemd handles automation, you may need to run these manually during setup or debugging.
 
@@ -106,7 +106,7 @@ bin/prune.sh
 
 ---
 
-## 5. Configuration Management
+## Configuration Management
 
 Configuration is persistent in `/etc/restic-ops`.
 
@@ -119,33 +119,33 @@ Configuration is persistent in `/etc/restic-ops`.
 
 Secrets are immutable and encrypted. To change a password or S3 key:
 
-1. **Decrypt to a temp file:**
+* **Decrypt to a temp file:**
+
 ```sh
 gpg -d /etc/restic-ops/restic.env.gpg > /etc/restic-ops/restic.env.tmp
 
 ```
 
+* **Edit the temp file:**
 
-2. **Edit the temp file:**
 ```sh
 vi /etc/restic-ops/restic.env.tmp
 
 ```
 
+* **Re-encrypt and replace:**
 
-3. **Re-encrypt and replace:**
 ```sh
 gpg --yes --symmetric --cipher-algo AES256 -o /etc/restic-ops/restic.env.gpg /etc/restic-ops/restic.env.tmp
 rm /etc/restic-ops/restic.env.tmp
 
 ```
 
-
-4. **Re-prime the cache (see below).**
+* **Re-prime the cache (see below).**
 
 ---
 
-## 6. Troubleshooting
+## Troubleshooting
 
 ### Removing Stale Locks
 
@@ -191,13 +191,14 @@ If this prompts for a password or fails:
 2. Ensure you have "primed" the cache (step above).
 3. Check `pinentry-mode loopback` settings if applicable.
 
-## 7. Manual Use Case
+---
+
+## Manual Use Case
 
 For personal computers such as laptops, which are not always online, you can add a manual
-retention cycle through /etc/restic-ops/restic.env. This will keep at least five last
+retention cycle through `/etc/restic-ops/restic.env`. This will keep at least five last
 backups but make sure that the backups are temporally spaced through the daily, monthly,
-yearly cycle. In other words, if you make 10 backups during a week, more are kept
-through the weekly etc. retention cycles.
+yearly cycle.
 
 ```
 export KEEP_LAST=5
@@ -205,12 +206,74 @@ export KEEP_DAILY=7
 export KEEP_WEEKLY=4
 export KEEP_MONTHLY=12
 export KEEP_YEARLY=2
+
 ```
+
+---
+
+## Advanced: Centralized Admin Console
+
+If you manage backups for multiple hosts (e.g., a "fleet" of servers), logging into each one as root to run maintenance is tedious. The **Admin Console** allows you to run maintenance commands (prune, check, stats) for *any* host from a single administrative machine (e.g., your laptop), without needing `sudo`.
+
+### Features
+
+* **Isolated Context:** Sets up a clean environment so it doesn't conflict with your personal GPG keys.
+* **Safe Caching:** Automatically uses a local cache directory (`~/.cache/restic-admin`) to avoid permission errors with root-owned paths.
+* **Robust Auth:** Uses memory-based password handling to bypass GPG agent caching issues.
+
+### Setup
+
+On your Admin machine, create a workspace that links to your installed tools and holds your encrypted keys.
+
+**Directory Structure:**
+
+```text
+~/restic-admin/
+├── bin -> /usr/local/bin/restic-ops/bin  # Symlink to installed tools
+└── etc/                                  # Local directory for secrets
+    ├── webserver-restic.env.gpg
+    ├── mailserver-restic.env.gpg
+    └── ...
+
+```
+
+**Initialization:**
+
+```sh
+mkdir -p ~/restic-admin/etc
+ln -s /usr/local/bin/restic-ops/bin ~/restic-admin/bin
+cd ~/restic-admin
+ln -s bin/run.sh run.sh
+
+```
+
+### Usage
+
+Run commands directly through the `run.sh` symlink.
+
+**Syntax:** `./run.sh <hostname> <command> [args...]`
+
+**Examples:**
+
+```sh
+cd ~/restic-admin
+
+# Prune the repository for host 'webserver'
+./run.sh webserver prune
+
+# Check repository health for 'mailserver' (read 100MB of data)
+./run.sh mailserver check --read-data-subset=100M
+
+# View stats for 'web'
+./run.sh webserver stats
+
+```
+
+**Note:** The first time you run a command for a host, the script will prompt you for the repository password. It handles authentication securely in memory for that session.
 
 ---
 
 ## See also
 
 * `docs/Deployment.md` for install/upgrade.
-* `docs/CRON.md` for BSD/cron scheduling.
-
+* `docs/README.md` for BSD/cron scheduling.

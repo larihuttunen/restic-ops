@@ -21,12 +21,9 @@ fi
 INCLUDE_FILE="$CONF_DIR/include.txt"
 EXCLUDE_FILE="$CONF_DIR/exclude.txt"
 
-if [ -f "$CONF_DIR/restic.env.gpg" ]; then
+
+if [ -z "${SECRETS:-}" ]; then
   SECRETS="$CONF_DIR/restic.env.gpg"
-elif [ -f "$CONF_DIR/secrets/restic.env.gpg" ]; then
-  SECRETS="$CONF_DIR/secrets/restic.env.gpg"
-else
-  SECRETS="${SECRETS:-$CONF_DIR/restic.env.gpg}"
 fi
 
 ###############################################################################
@@ -40,16 +37,32 @@ fi
 ###############################################################################
 # Secrets loader (GPG)
 ###############################################################################
+
 load_secrets() {
   CRED_FILE="$1"
   if command -v gpg >/dev/null 2>&1; then
-    if [ "${LOOPBACK:-0}" = "1" ]; then
+    
+    # STRATEGY 1: Use Memory Pass-Through (Reliable)
+    if [ -n "${ADMIN_GPG_PASS:-}" ]; then
+      eval "$(echo "$ADMIN_GPG_PASS" | gpg --batch --quiet --passphrase-fd 0 --decrypt "$CRED_FILE")"
+    
+    # STRATEGY 2: Admin Context / Loopback Fallback
+    elif [ "${LOOPBACK:-0}" = "1" ] || [ -n "${GNUPGHOME:-}" ]; then
       eval "$(gpg --batch --quiet --pinentry-mode loopback --decrypt "$CRED_FILE")"
+      
+    # STRATEGY 3: Standard (Root/Interactive)
     else
       eval "$(gpg --batch --quiet --decrypt "$CRED_FILE")"
     fi
+
   else
     log "ERROR: gpg not available"; exit 1
+  fi
+  
+  # Force User Cache Dir in Admin Context
+  if [ -n "${GNUPGHOME:-}" ]; then
+      export RESTIC_CACHE_DIR="$HOME/.cache/restic-admin"
+      mkdir -p "$RESTIC_CACHE_DIR"
   fi
 }
 
