@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap tracks the evolution of **restic-ops** from the current beta toward a stable `1.0.0`. It is operator‑centric, emphasizes security (no plaintext passphrases on disk), and prioritizes reliability under systemd.
+This roadmap tracks the evolution of **restic-ops** from the current beta toward a stable `1.0.0`. It is operator‑centric, emphasizes security (no plaintext passphrases on disk), and prioritizes reliability under automation.
 
 **Semantic Versioning:**
 - **MAJOR**: Breaking changes to CLI or behavior.
@@ -18,68 +18,46 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 ### v0.2.0-BETA — Automation & Release Engineering
 - **Config Separation:** `/etc/restic-ops` for persistent config.
 - **Helpers:** Added `list.sh`, `stats.sh`, `prune.sh`.
-- **Automation:** Systemd units (timers/services) and Cron support added.
+- **Automation:** Systemd units (timers/services) and Cron support.
 - **Security:** Integrated GPG-agent caching for non-interactive runs.
-- **Release Engineering:** Automated GitHub Actions pipeline producing GPG-signed self-extracting installers (`.run` files).
+- **Release:** Automated GitHub Actions pipeline producing GPG-signed installers.
+
+### v0.2.x — Deployment & Polish
+- **v0.2.1:** Documentation polish and lock removal guidance.
+- **v0.2.2 - v0.2.3 (OpenBSD):** POSIX compliance, `tar` vs `gtar` fixes, and `prime-gpg.sh` helper.
+- **v0.2.5:** Manual retention policy support (`KEEP_LAST`, etc.).
+- **v0.2.6:** System timers and job rework for consistency across Linux and OpenBSD.
 
 ---
 
-## 🚧 In Progress: v0.2.x — Deployment & Hardening
+## 🚧 In Progress: v0.3.0 — Centralized Fleet Management
 
-### v0.2.1 — Documentation & Reliability Polish (Current Focus)
-**Goal:** Ensure the manual deployment process is frictionless and the existing scripts are robust.
-- [x] **Docs:** Finalize `docs/Deployment.md` with tested, copy-paste friendly steps (verified on fresh VM).
-- [x] **Docs:** Expand `docs/Admin.md` with restoration examples, service management, and **lock removal** (`restic unlock` guidance).
-- [x] **Polish:** Ensure error messages in `common.sh` clearly indicate when GPG agent priming is missing.
+**Goal:** Allow operators to manage backup integrity for a "fleet" of servers from a single admin workstation, without needing root access on every target.
 
-### v0.2.2 Test on OpenBSD
-**Goal:** Make sure that the releease works on OpenBSD
-- [x] **restic-ops-run**: Tar vs. gtar compatibility.
-- [x] **POSIX** compliance for scripts.
-- [x] **Cron** setup works.
-- [x] **prime-gpg.sh** helper script for GPG secret priming.
-
-### v0.2.3 OpenBSD Functional
-**Goal:** Make sure that the releease works on OpenBSD
-- [x] Cron job validation
-- [x] Deployment simplification.
-
-### v0.2.5 Manual Use Case
-**Goal:** Support a manual retention cycle.
-- [x] Make retention.sh support manual retention.
-- [x] Document manual retention example in Admin.md
-
-### v0.2.6 System Timers
-**Goal:** Rework system timers and josb on both OpenBSD and Linux.
-- [ ] Rework the systemd timers and services.
-- [ ] Align the documentation.
-
-### v0.2.x — Disaster Recovery (DR) Drills
-**Goal:** Ensure operators can restore data when the house is on fire.
-- [ ] **DR Guide:** `docs/DR.md` covering bare-metal recovery (OS + restic-ops + data).
-- [ ] **Mount Helper:** `bin/mount.sh` wrapper to browse snapshots interactively (FUSE) for single-file recovery.
-- [ ] **Restore Search:** `bin/find.sh` wrapper (using `restic find`) to locate lost files across snapshot history.
-- [ ] **Test Protocol:** A standardized procedure for verifying backups (e.g., monthly "fire drill").
+- [x] **Admin Console:** `bin/run.sh` "context switcher" to run tools locally using target secrets.
+- [x] **Remote Health Checks:** `bin/check.sh` wrapper for `restic check` (cost-effective verification).
+- [x] **Robust Auth:** "Memory Pass-Through" strategy to bypass GPG Agent caching issues for symmetric passwords.
+- [x] **Cache Safety:** Automatic redirection of cache directories when running in Admin Mode to prevent permission errors.
 
 ---
 
 ## 🔮 Future Milestones
 
-### v0.3.0 — Health & Observability
-**Goal:** Proactive monitoring and repository integrity without a monolithic CLI.
-- **Health Check:** `bin/check.sh` wrapper for `restic check` using `--read-data-subset` for cost-effective integrity verification.
-- **Change Auditing:** `bin/diff.sh` wrapper (using `restic diff`) to debug unexpected backup growth.
-- **Metrics:** `bin/stats.sh --prometheus` or JSON output formatted for monitoring agents (Zabbix/Datadog).
-- **Notifications:** Simple webhook integration (e.g., `bin/notify.sh` or common hook) for failure alerts.
+### v0.4.0 — Observability & DR
+**Goal:** Proactive monitoring and disaster recovery.
+- **Change Auditing:** `bin/diff.sh` wrapper to debug unexpected backup growth.
+- **Metrics:** `bin/stats.sh --prometheus` or JSON output for monitoring agents (Zabbix/Datadog).
+- **Mount Helper:** `bin/mount.sh` wrapper (FUSE) for interactive single-file recovery.
+- **DR Guide:** `docs/DR.md` covering bare-metal recovery scenarios.
 
-### v0.4.0 — Hardening & Policy
+### v0.5.0 — Hardening & Policy
 **Goal:** Advanced security features.
-- **Passphrase Rotation:** Documentation/scripting to change the repository password (restic key) and update `restic.env.gpg` safely.
-- **Key Rotation:** Automated re-encryption of the local `restic.env.gpg` file (separate from repo password).
-- **Multiple Repos:** Support for copying snapshots to a secondary remote (`restic copy`) for redundancy.
-- **Immutable Backups:** Documentation/setup for Object Lock (S3) or Append-Only modes.
+- **Passphrase Rotation:** Scripting to change the repository password safely.
+- **Key Rotation:** Automated re-encryption of the local `restic.env.gpg` file.
+- **Multiple Repos:** Support for `restic copy` to secondary remotes.
+- **Immutable Backups:** Documentation/setup for Object Lock (S3).
 
 ### v1.0.0 — Stable Release
 - API/Interface stability guarantee.
-- Full test coverage (CI/CD integration).
-- Complete documentation suite (Install, Admin, Recovery, Architecture).
+- Full test coverage.
+- Complete documentation suite.
