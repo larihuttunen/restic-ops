@@ -5,6 +5,7 @@
 # Configuration: /etc/restic-ops/restic.env.external-disk.gpg (Symmetric)
 # Sources:       /etc/restic-ops/include-external.txt
 # Excludes:      /etc/restic-ops/exclude-external.txt
+# Features:      Auto-init, Canary Checks, Symmetric Encryption
 # ==============================================================================
 
 set -e  # Exit on error
@@ -21,7 +22,7 @@ CANARY_NAME=".restic.marker"
 export GPG_TTY=$(tty)
 
 echo "========================================"
-echo "🛡️  Safe Backup: External Mount Check"
+echo "🛡️  Manual Host Backup: External Disk"
 echo "========================================"
 
 # --- 2. Validation of Control Files ---
@@ -34,48 +35,61 @@ if [[ ! -f "$INCLUDE_FILE" ]]; then
     exit 1
 fi
 
-# --- 3. Canary Check (The Safety Logic) ---
-echo "🔍 Checking mount points (Canaries)..."
+# --- 3. Canary Check (Source Safety) ---
+echo "🔍 Checking source mount points (Canaries)..."
 
-# Verify every path in the include file contains the marker
 while IFS= read -r dir || [ -n "$dir" ]; do
-    # Skip comments and empty lines
     [[ "$dir" =~ ^#.*$ ]] || [[ -z "$dir" ]] && continue
 
     CANARY_PATH="${dir%/}/$CANARY_NAME"
-
-    if [[ -f "$CANARY_PATH" ]]; then
-        echo "   ✅ Found canary in: $dir"
-    else
+    if [[ ! -f "$CANARY_PATH" ]]; then
         echo "   ❌ CRITICAL: Canary missing in: $dir"
-        echo "      Expected file: $CANARY_PATH"
-        echo "      Is the disk mounted? Aborting backup."
+        echo "      Is the source disk mounted? Aborting."
         exit 1
     fi
 done < "$INCLUDE_FILE"
 
 echo "✅ All source mounts verified."
 
-# --- 4. Secure Decryption & Sourcing ---
+# --- 4. Secure Decryption ---
 echo "🔐 Decrypting configuration..."
-
-# Decrypt variables directly into memory.
-# Since this uses symmetric encryption, GPG will prompt for the file passphrase.
 source <(gpg --decrypt --quiet "$CONFIG_FILE")
 
-# Verify Repo Variable
 if [[ -z "${RESTIC_REPOSITORY:-}" ]]; then
-    echo "❌ Error: RESTIC_REPOSITORY not found in encrypted config."
+    echo "❌ Error: RESTIC_REPOSITORY not found in config."
     exit 1
 fi
 
 echo "📂 Target Repository: $RESTIC_REPOSITORY"
 
-# --- 5. Execution ---
+# --- 5. Repository Check & Auto-Init ---
+echo "🔍 Verifying Repository status..."
+
+# Try to read the repo config. If this fails, the repo likely doesn't exist.
+if ! restic cat config >/dev/null 2>&1; then
+    echo "⚠️  Repository does not exist or is inaccessible."
+    echo ""
+    echo "    Would you like to initialize a new repository at:"
+    echo "    $RESTIC_REPOSITORY"
+    echo ""
+    read -p "    Initialize? (y/N): " -r CONFIRM
+    
+    if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+        echo "🔨 Initializing new repository..."
+        restic init
+        echo "✅ Repository initialized."
+    else
+        echo "❌ Aborting backup."
+        exit 1
+    fi
+else
+    echo "✅ Repository found and accessible."
+fi
+
+# --- 6. Execution ---
 echo "🚀 Starting Restic Backup..."
 echo "----------------------------------------"
 
-# Run backup using the verified include list and exclusions
 restic backup \
     --files-from="$INCLUDE_FILE" \
     --exclude-file="$EXCLUDE_FILE" \
