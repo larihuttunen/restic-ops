@@ -40,9 +40,9 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 **Goal:** Secure, manual workflows for physical backups (USB/HDD) disconnected from the main automation loop.
 
-- [x] **Standalone Script:** `backup-external.sh` for manual execution.
+- [x] **Standalone Script:** `backup-external.sh` with interactive "Lazy Initialization" for new drives.
 - [x] **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
-- [x] **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists (`include-external.txt`, `exclude-external.txt`).
+- [x] **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists.
 - [x] **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups.
 - [x] **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
 
