@@ -28,29 +28,36 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - **v0.2.5:** Manual retention policy support (`KEEP_LAST`, etc.).
 - **v0.2.6:** System timers and job rework for consistency across Linux and OpenBSD.
 
+### v0.3.0 — Centralized Fleet Management
+- **Admin Console:** `bin/run.sh` "context switcher" to run tools locally using target secrets.
+- **Remote Health Checks:** `bin/check.sh` wrapper for `restic check` (cost-effective verification).
+- **Robust Auth:** "Memory Pass-Through" strategy to bypass GPG Agent caching issues.
+- **Cache Safety:** Automatic redirection of cache directories when running in Admin Mode.
+
 ---
 
-## 🚧 In Progress: v0.3.0 — Centralized Fleet Management
+## 🚧 In Progress: v0.4.0 — Cold Storage & External Media
 
-**Goal:** Allow operators to manage backup integrity for a "fleet" of servers from a single admin workstation, without needing root access on every target.
+**Goal:** Secure, manual workflows for physical backups (USB/HDD) disconnected from the main automation loop.
 
-- [x] **Admin Console:** `bin/run.sh` "context switcher" to run tools locally using target secrets.
-- [x] **Remote Health Checks:** `bin/check.sh` wrapper for `restic check` (cost-effective verification).
-- [x] **Robust Auth:** "Memory Pass-Through" strategy to bypass GPG Agent caching issues for symmetric passwords.
-- [x] **Cache Safety:** Automatic redirection of cache directories when running in Admin Mode to prevent permission errors.
+- [x] **Standalone Script:** `backup-external.sh` for manual execution.
+- [x] **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
+- [x] **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups via `include-external.txt`.
+- [x] **Configuration:** Isolated config path (`restic.env.external-disk.gpg`) to protect main system settings.
+- [x] **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
 
 ---
 
 ## 🔮 Future Milestones
 
-### v0.4.0 — Observability & DR
+### v0.5.0 — Observability & DR
 **Goal:** Proactive monitoring and disaster recovery.
 - **Change Auditing:** `bin/diff.sh` wrapper to debug unexpected backup growth.
 - **Metrics:** `bin/stats.sh --prometheus` or JSON output for monitoring agents (Zabbix/Datadog).
 - **Mount Helper:** `bin/mount.sh` wrapper (FUSE) for interactive single-file recovery.
 - **DR Guide:** `docs/DR.md` covering bare-metal recovery scenarios.
 
-### v0.5.0 — Hardening & Policy
+### v0.6.0 — Hardening & Policy
 **Goal:** Advanced security features.
 - **Passphrase Rotation:** Scripting to change the repository password safely.
 - **Key Rotation:** Automated re-encryption of the local `restic.env.gpg` file.

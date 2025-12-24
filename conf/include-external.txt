@@ -1,0 +1,5 @@
+# List of directories/mount points to back up
+# Ensure the .restic.marker file exists in the root of each path below!
+
+/mnt/external-data
+/mnt/photos-archive
