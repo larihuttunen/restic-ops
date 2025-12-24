@@ -1,0 +1,7 @@
+# Standard exclusions
+.DS_Store
+Thumbs.db
+lost+found/
+
+# Exclude the canary file itself if you want (optional)
+.restic.marker

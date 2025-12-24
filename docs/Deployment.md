@@ -224,3 +224,4 @@ systemctl list-timers | grep restic
 * `docs/Admin.md`: Daily operations and troubleshooting.
 * `docs/CRON.md`: Scheduling for BSD or non-systemd environments.
 * `docs/Releases.md`: Verifying GPG signatures.
+* `docs/External.md`: For workflows involving offline or physical media.
