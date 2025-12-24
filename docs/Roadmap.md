@@ -42,8 +42,8 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 - [x] **Standalone Script:** `backup-external.sh` for manual execution.
 - [x] **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
-- [x] **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups via `include-external.txt`.
-- [x] **Configuration:** Isolated config path (`restic.env.external-disk.gpg`) to protect main system settings.
+- [x] **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists (`include-external.txt`, `exclude-external.txt`).
+- [x] **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups.
 - [x] **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
 
 ---
