@@ -6,31 +6,23 @@ This workflow addresses the "cold storage" use case, where backups are manually 
 
 The external backup process uses a standalone script and a dedicated configuration set. This prevents pollution of the main system's environment.
 
-* **Script**: `backup-external.sh`
+* Script: `backup-external.sh`
 * The manual entry point. Handles validation, decryption, and execution.
-
-
-* **Configuration**: `/etc/restic-ops/restic.env.external-disk.gpg`
+* Configuration: `/etc/restic-ops/restic.env.external-disk.gpg`
 * A symmetrically encrypted file containing the repository location and password.
 * Requires a passphrase to decrypt (no private key needed).
-
-
-* **Source List**: `/etc/restic-ops/include-external.txt`
+* Source List: `/etc/restic-ops/include-external.txt`
 * A plaintext list of absolute paths to back up.
-
-
-* **Exclusions**: `/etc/restic-ops/exclude-external.txt`
+* Exclusions: `/etc/restic-ops/exclude-external.txt`
 * Standard patterns to exclude from the backup.
-
-
 
 ## The Canary Safety Check
 
-To prevent data corruption or "empty" backups (which occur if a script runs while the drive is unmounted), this workflow enforces a **Canary System**.
+To prevent data corruption or "empty" backups (which occur if a script runs while the drive is unmounted), this workflow enforces a Canary System.
 
-* **Mechanism**: The script reads every path defined in `include-external.txt`.
-* **Requirement**: It looks for a specific empty file named `.restic.marker` inside the root of that path.
-* **Behavior**: If the marker is missing for any defined path, the script aborts immediately.
+* Mechanism: The script reads every path defined in `include-external.txt`.
+* Requirement: It looks for a specific empty file named `.restic.marker` inside the root of that path.
+* Behavior: If the marker is missing for any defined path, the script aborts immediately.
 
 ## Setup Guide
 
@@ -45,7 +37,7 @@ gpg --symmetric --cipher-algo AES256 \
 
 ```
 
-*You will be prompted to set a passphrase. This passphrase is required to run the backup. Securely remove the plaintext file after encryption.*
+You will be prompted to set a passphrase. This passphrase is required to run the backup. Securely remove the plaintext file after encryption.
 
 ### Canary Creation
 
@@ -65,6 +57,6 @@ Connect the external drive and mount it to the expected location. Execute the sc
 
 ```
 
-* **Authentication**: The GPG agent will prompt for the symmetric passphrase you set during encryption.
-* **Verification**: The script will verify the existence of the canary markers.
-* **Execution**: Restic initiates the backup using the decrypted credentials.
+* Authentication: The GPG agent will prompt for the symmetric passphrase you set during encryption.
+* Verification: The script will verify the existence of the canary markers.
+* Execution: Restic initiates the backup using the decrypted credentials.
