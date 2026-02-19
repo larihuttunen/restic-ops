@@ -1,16 +1,16 @@
 [Unit]
 Description=Restic prune (repository compaction)
-# Ensure we don't prune while retention is calculating
 After=restic-retention.service
+ConditionACPower=true
 
 [Service]
 Type=oneshot
 User=root
 Group=root
 Environment=GNUPGHOME=/root/.gnupg
-
 ExecStart=/usr/local/bin/restic-ops/bin/prune.sh
-
+Restart=on-failure
+RestartSec=2h
 NoNewPrivileges=yes
 MemoryDenyWriteExecute=yes
 PrivateTmp=yes

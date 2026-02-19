@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap tracks the evolution of **restic-ops** from the current beta toward a stable `1.0.0`. It is operator‑centric, emphasizes security (no plaintext passphrases on disk), and prioritizes reliability under automation.
+This roadmap tracks the evolution of **restic-ops** from the current beta toward a stable `1.0.0`. It is operator-centric, emphasizes security (no plaintext passphrases on disk), and prioritizes reliability under automation.
 
 **Semantic Versioning:**
 - **MAJOR**: Breaking changes to CLI or behavior.
@@ -9,7 +9,7 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ---
 
-## ✅ Completed
+## Completed
 
 ### v0.1.0 — Baseline
 - Basic shell scripts: `backup.sh`, `restore.sh`, `retention.sh`.
@@ -34,21 +34,19 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - **Robust Auth:** "Memory Pass-Through" strategy to bypass GPG Agent caching issues.
 - **Cache Safety:** Automatic redirection of cache directories when running in Admin Mode.
 
----
+### v0.4.0 — Cold Storage & External Media
+- **Standalone Script:** `backup-external.sh` with interactive "Lazy Initialization" for new drives.
+- **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
+- **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists.
+- **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups.
+- **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
 
-## 🚧 In Progress: v0.4.0 — Cold Storage & External Media
+### v0.4.1 — Mobile & Power-Aware Automation
+- **Timer Persistence:** Added `Persistent=true` and `RandomizedDelaySec` to ensure missed jobs run upon system wake.
+- **Power Awareness:** Implemented `ConditionACPower=true` in systemd services to skip heavy operations while on battery power.
+- **Resilience:** Added `Restart=on-failure` logic to handle offline states or unprimed GPG agents gracefully.
 
-**Goal:** Secure, manual workflows for physical backups (USB/HDD) disconnected from the main automation loop.
-
-- [x] **Standalone Script:** `backup-external.sh` with interactive "Lazy Initialization" for new drives.
-- [x] **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
-- [x] **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists.
-- [x] **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups.
-- [x] **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
-
----
-
-## 🔮 Future Milestones
+## Future Milestones
 
 ### v0.5.0 — Observability & DR
 **Goal:** Proactive monitoring and disaster recovery.
