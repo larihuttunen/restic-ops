@@ -1,41 +1,39 @@
-# Deployment Guide (Linux, systemd) — restic-ops
+# Deployment Guide (Linux, systemd)
 
-This guide covers installing and upgrading restic-ops using the self-extracting release.
-Configuration is always stored in `/etc/restic-ops` and is never overwritten by upgrades.
-
----
+This guide covers installing and upgrading restic-ops using the self-extracting release. Configuration is always stored in `/etc/restic-ops` and is never overwritten by upgrades.
 
 ## Dependencies
 
-**Required (Linux):**
+Required (Linux):
+
 * `restic`
 * `gpg` (and `pinentry`)
-* `bash`
 * `systemd`
 
-**Optional:**
+Optional:
+
 * `jq` (for enhanced stats output)
 * `logrotate` (for log file management)
 
----
-
 ## Directory Layout
 
-* **Code (versioned):** `/usr/local/lib/restic-ops/vN.N.N/`
-* **Symlink:** `/usr/local/bin/restic-ops` → current version
-* **Config (persistent):** `/etc/restic-ops/`
-    * `include.txt`
-    * `exclude.txt`
-    * `restic.env.gpg` (encrypted secrets)
+* Code (versioned): `/usr/local/lib/restic-ops/vN.N.N/`
+* Symlink: `/usr/local/bin/restic-ops` pointing to current version
+* Config (persistent): `/etc/restic-ops/`
+* `include.txt`
+* `exclude.txt`
+* `restic.env.gpg` (encrypted secrets)
 
----
+
 
 ## Installation
 
 ### Download and Verify
+
 Download the latest self-extracting installer (`restic-ops.run`) and its signature (`.asc`). Verify them using GPG as described in `Releases.md`.
 
 ### Extract and Install
+
 Create a versioned directory and run the self-extractor.
 
 ```sh
@@ -53,8 +51,6 @@ Link the new version to the system path.
 ln -sfn /usr/local/lib/restic-ops/vN.N.N /usr/local/bin/restic-ops
 
 ```
-
----
 
 ## Configuration
 
@@ -87,9 +83,9 @@ rm /etc/restic-ops/restic.env
 
 ### GPG Agent Persistence (40-Day Cache)
 
-To ensure headless backups work for extended periods, configure the GPG agent to cache the passphrase for 40 days ( seconds).
+To ensure headless backups work for extended periods, configure the GPG agent to cache the passphrase for 40 days (3456000 seconds).
 
-**Configure TTL:**
+Configure TTL:
 Edit `/root/.gnupg/gpg-agent.conf` (create if missing):
 
 ```ini
@@ -98,7 +94,7 @@ max-cache-ttl 3456000
 
 ```
 
-**Restart Agent:**
+Restart Agent:
 
 ```sh
 gpgconf --kill gpg-agent
@@ -113,8 +109,6 @@ Run the helper script to interactively cache your passphrase. You will need to r
 /usr/local/bin/restic-ops/bin/prime-gpg.sh
 
 ```
-
----
 
 ## Initialization
 
@@ -135,8 +129,6 @@ Run a manual backup to ensure everything is working.
 /usr/local/bin/restic-ops/bin/backup.sh
 
 ```
-
----
 
 ## Automation (Systemd)
 
@@ -166,8 +158,6 @@ systemctl enable --now restic-prune.timer
 
 ```
 
----
-
 ## Upgrading
 
 ### Install New Version
@@ -193,9 +183,7 @@ systemctl restart restic-backup.timer restic-retention.timer restic-prune.timer
 
 ```
 
-*Note: Do not touch `/etc/restic-ops`. Your configuration stays compatible across versions.*
-
----
+Note: Do not touch `/etc/restic-ops`. Your configuration stays compatible across versions.
 
 ## Verification
 
@@ -216,8 +204,6 @@ Verify that the timers are active and scheduled.
 systemctl list-timers | grep restic
 
 ```
-
----
 
 ## See Also
 
