@@ -3,22 +3,19 @@ Description=Restic backup
 Documentation=https://github.com/restic/restic
 After=network-online.target
 Wants=network-online.target
+ConditionACPower=true
 
 [Service]
 Type=oneshot
 User=root
 Group=root
-# Essential for GPG agent socket discovery
 Environment=GNUPGHOME=/root/.gnupg
-
-# Direct execution via the symlink
 ExecStart=/usr/local/bin/restic-ops/bin/backup.sh
-
-# Security Hardening
+Restart=on-failure
+RestartSec=1h
 NoNewPrivileges=yes
 MemoryDenyWriteExecute=yes
 PrivateTmp=yes
 ProtectSystem=strict
-# Allow read access to the tool itself
 ReadOnlyPaths=/usr/local/bin/restic-ops
 SyslogIdentifier=restic-backup
