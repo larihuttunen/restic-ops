@@ -1,9 +1,5 @@
 .PHONY: release check-version check-branch check-status tag
 
-# Get current git state
-BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-IS_CLEAN := $(shell git status --porcelain)
-
 # Main entrypoint
 release: check-version check-branch check-status tag
 
@@ -19,14 +15,16 @@ check-version:
 	fi
 
 check-branch:
-	@if [ "$(BRANCH)" != "main" ]; then \
+	@BRANCH=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$BRANCH" != "main" ]; then \
 		echo "ERROR: Releases must be tagged from the 'main' branch."; \
-		echo "Current branch: $(BRANCH)"; \
+		echo "Current branch: $$BRANCH"; \
 		exit 1; \
 	fi
 
 check-status:
-	@if [ -n "$(IS_CLEAN)" ]; then \
+	@IS_CLEAN=$$(git status --porcelain); \
+	if [ -n "$$IS_CLEAN" ]; then \
 		echo "ERROR: Working directory is not clean."; \
 		echo "Please commit or stash changes before cutting a release."; \
 		exit 1; \
