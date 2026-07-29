@@ -46,6 +46,11 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 - **Power Awareness:** Implemented `ConditionACPower=true` in systemd services to skip heavy operations while on battery power.
 - **Resilience:** Added `Restart=on-failure` logic to handle offline states or unprimed GPG agents gracefully.
 
+### v0.4.2 - Retention Bug Fix
+
+- Make it possible to override a retention variable in the env file with an empty value, e.g.  
+  KEEP_LAST=
+
 ## Future Milestones
 
 ### v0.5.0 — Observability & DR
