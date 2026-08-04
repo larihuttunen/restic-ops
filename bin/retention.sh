@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(CDPATH="" cd -- "$(dirname "$0")" && pwd)"
+# shellcheck source=bin/common.sh
 . "$SCRIPT_DIR/common.sh"
 
 load_secrets "$SECRETS"

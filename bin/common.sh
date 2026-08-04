@@ -10,7 +10,7 @@ log() { printf '%s %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
 ###############################################################################
 # Locate script & configuration
 ###############################################################################
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(CDPATH="" cd -- "$(dirname "$0")" && pwd)"
 CONF_DIR_DEFAULT="/etc/restic-ops"
 CONF_DIR="${CONF_DIR:-$CONF_DIR_DEFAULT}"
 

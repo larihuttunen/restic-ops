@@ -19,7 +19,8 @@ EXCLUDE_FILE="/etc/restic-ops/exclude-external.txt"
 CANARY_NAME=".restic.marker"
 
 # Essential for manual runs (GPG Pinentry)
-export GPG_TTY=$(tty)
+GPG_TTY=$(tty)
+export GPG_TTY
 
 echo "========================================"
 echo "🛡️  Manual Host Backup: External Disk"
@@ -53,6 +54,7 @@ echo "✅ All source mounts verified."
 
 # --- 4. Secure Decryption ---
 echo "🔐 Decrypting configuration..."
+# shellcheck source=/dev/null
 source <(gpg --decrypt --quiet "$CONFIG_FILE")
 
 if [[ -z "${RESTIC_REPOSITORY:-}" ]]; then
