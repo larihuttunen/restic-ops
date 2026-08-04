@@ -9,48 +9,6 @@ This roadmap tracks the evolution of **restic-ops** from the current beta toward
 
 ---
 
-## Completed
-
-### v0.1.0 — Baseline
-- Basic shell scripts: `backup.sh`, `restore.sh`, `retention.sh`.
-- Manual GPG passphrase handling.
-
-### v0.2.0-BETA — Automation & Release Engineering
-- **Config Separation:** `/etc/restic-ops` for persistent config.
-- **Helpers:** Added `list.sh`, `stats.sh`, `prune.sh`.
-- **Automation:** Systemd units (timers/services) and Cron support.
-- **Security:** Integrated GPG-agent caching for non-interactive runs.
-- **Release:** Automated GitHub Actions pipeline producing GPG-signed installers.
-
-### v0.2.x — Deployment & Polish
-- **v0.2.1:** Documentation polish and lock removal guidance.
-- **v0.2.2 - v0.2.3 (OpenBSD):** POSIX compliance, `tar` vs `gtar` fixes, and `prime-gpg.sh` helper.
-- **v0.2.5:** Manual retention policy support (`KEEP_LAST`, etc.).
-- **v0.2.6:** System timers and job rework for consistency across Linux and OpenBSD.
-
-### v0.3.0 — Centralized Fleet Management
-- **Admin Console:** `bin/run.sh` "context switcher" to run tools locally using target secrets.
-- **Remote Health Checks:** `bin/check.sh` wrapper for `restic check` (cost-effective verification).
-- **Robust Auth:** "Memory Pass-Through" strategy to bypass GPG Agent caching issues.
-- **Cache Safety:** Automatic redirection of cache directories when running in Admin Mode.
-
-### v0.4.0 — Cold Storage & External Media
-- **Standalone Script:** `backup-external.sh` with interactive "Lazy Initialization" for new drives.
-- **Symmetric Auth:** Leverages existing symmetric encryption support for keyless host operation.
-- **Configuration:** Isolated environment (`restic.env.external-disk.gpg`) with dedicated selection lists.
-- **Safety Canaries:** Mount verification (`.restic.marker`) to prevent empty backups.
-- **Documentation:** `docs/External.md` guide for air-gapped/cold-storage scenarios.
-
-### v0.4.1 — Mobile & Power-Aware Automation
-- **Timer Persistence:** Added `Persistent=true` and `RandomizedDelaySec` to ensure missed jobs run upon system wake.
-- **Power Awareness:** Implemented `ConditionACPower=true` in systemd services to skip heavy operations while on battery power.
-- **Resilience:** Added `Restart=on-failure` logic to handle offline states or unprimed GPG agents gracefully.
-
-### v0.4.2 - Retention Bug Fix
-
-- Make it possible to override a retention variable in the env file with an empty value, e.g.  
-  KEEP_LAST=
-
 ## Future Milestones
 
 ### v0.5.0 — Observability & DR

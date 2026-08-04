@@ -25,7 +25,8 @@ fi
 
 # 2. Fix Environment
 export GNUPGHOME="$HOME/.gnupg"
-export GPG_TTY=$(tty)
+GPG_TTY="$(tty)"
+export GPG_TTY
 export RESTIC_CACHE_DIR="$HOME/.cache/restic-admin"
 mkdir -p "$RESTIC_CACHE_DIR"
 
@@ -65,7 +66,7 @@ if ! gpg --batch --quiet --pinentry-mode loopback --decrypt "$SECRETS" >/dev/nul
     # Securely read password
     stty -echo
     printf "Enter Password: "
-    read PASS
+    read -r PASS
     stty echo
     echo ""
 
