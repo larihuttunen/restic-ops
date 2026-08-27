@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-08-27
+### Added
+- **CLI Ergonomics:** Added direct flags (`--diff`, `--dirs`, `--top-files`) to `stats.sh` for faster analysis.
+- **Smart Defaults:** `stats.sh --diff` now automatically defaults to comparing the latest 2 snapshots if `-L` is omitted.
+- **External Backup Parity:** Ported proactive anomaly detection (GiB/TiB threshold and automated diffs) to `backup-external.sh`.
+
+### Changed
+- **External Backup Refactor:** Rewrote `backup-external.sh` for strict POSIX compliance (removed `bash` dependencies), unified it with `common.sh` for standard secrets loading, and replaced emojis with ASCII alert prefixes (`[INFO]`, `[ERROR]`, `[WARN]`, `[OK]`).
+
+### Fixed
+- **Snapshot Parsing:** Fixed an `awk` regex bug in `stats.sh` where restic summary footers (e.g., "4 snapshots") were erroneously parsed as snapshot IDs.
+
 ## [0.4.4] - 2026-08-27
 ### Added
 - **Proactive Anomaly Detection:** `backup.sh` now tracks storage growth and automatically triggers root-cause analysis on unexpected data spikes (GiB/TiB thresholds).

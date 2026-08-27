@@ -1,10 +1,5 @@
 #!/usr/bin/env sh
 # restic-ops: actionable stats and anomaly analysis for operators.
-# Modes: 
-#  - dirs:      Shows storage size per root-level directory
-#  - top-files: Lists the 20 largest files in a snapshot
-#  - diff:      Compares two snapshots to show what changed
-#  - raw:       Passthrough to standard 'restic stats'
 set -eu
 
 SCRIPT_DIR="$(CDPATH="" cd -- "$(dirname "$0")" && pwd)"
@@ -22,56 +17,54 @@ SNAPSHOT_IDS=""
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
-usage() {
-  cat <<'USAGE'
-Usage: bin/stats.sh --mode <dirs|top-files|diff|raw> [options]
-
-Options:
-  -m, --mode <mode>        Analysis mode (required).
-  -H, --host <host>        Filter by host.
-  -L, --latest <N>         Use the latest N snapshots (default: 1).
-  -S, --snapshot <ID>      Specify snapshot ID explicitly.
-
-Examples:
-  bin/stats.sh -H myserver -m dirs
-  bin/stats.sh -H myserver -m top-files
-  bin/stats.sh -H myserver -L 2 -m diff
-USAGE
-}
-
+# Parse arguments
 while [ $# -gt 0 ]; do
   case "$1" in
     -m|--mode)        MODE="${2:-}"; shift 2 ;;
+    --dirs)           MODE="dirs"; shift ;;
+    --diff)           MODE="diff"; shift ;;
+    --top-files)      MODE="top-files"; shift ;;
     -H|--host)        HOST="${2:-}"; shift 2 ;;
     -L|--latest)      LATEST="${2:-}"; shift 2 ;;
     -S|--snapshot)    SNAPSHOT_IDS="${SNAPSHOT_IDS} ${2:-}"; shift 2 ;;
-    -h|--help)        usage; exit 0 ;;
+    -h|--help)
+      printf "Usage: stats.sh [-H host] [--diff | --dirs | --top-files | -m raw] [-L N]\n"
+      exit 0 
+      ;;
     *)                shift ;;
   esac
 done
 
-# Resolve latest snapshots if IDs are not explicitly provided
+# Smart default for anomaly detection:
+# If backup.sh triggers '--diff' without specifying '-L 2', auto-correct it.
+if [ "$MODE" = "diff" ] && [ "$LATEST" = "1" ] && [ -z "$SNAPSHOT_IDS" ]; then
+  LATEST="2"
+fi
+
+# Fetch IDs if not provided manually
 if [ -z "$SNAPSHOT_IDS" ]; then
   SNAP_CMD="restic -r \"$RESTIC_REPOSITORY\" snapshots --latest $LATEST --compact"
   [ -n "$HOST" ] && SNAP_CMD="$SNAP_CMD --host \"$HOST\""
   
-  # Fetch IDs and clean empty lines
-  SNAPSHOT_IDS=$(eval "$SNAP_CMD" | awk 'BEGIN{skip=1} /^ID[[:space:]]/ {next} /^[[:space:]]*$/ {next} /^---/ {next} {print $1}')
+  # Strict regex matching: fetch ONLY the 8-character hex IDs.
+  # This prevents Restic footer text (e.g., "4 snapshots") from breaking the ID list.
+  SNAPSHOT_IDS=$(eval "$SNAP_CMD" | awk '/^[0-9a-f]{8}[[:space:]]/ {print $1}')
   SNAPSHOT_IDS=$(printf '%s' "$SNAPSHOT_IDS" | tr '\n' ' ' | sed 's/ *$//')
   
   [ -n "$SNAPSHOT_IDS" ] || die "No snapshots found for the given filters."
 fi
 
-# Ensure jq is available for custom modes
+# Ensure jq is installed (only required for JSON-based analytic modes, not diff/raw)
 if [ "$MODE" != "raw" ] && [ "$MODE" != "diff" ] && ! command -v jq >/dev/null 2>&1; then
     die "jq is required for '$MODE' mode."
 fi
 
+# Route to the correct operation mode
 case "$MODE" in
     diff)
         ID_COUNT=$(printf '%s\n' "$SNAPSHOT_IDS" | wc -w)
         if [ "$ID_COUNT" -ne 2 ]; then
-            die "Mode 'diff' requires exactly 2 snapshots (e.g., -L 2). Found: $ID_COUNT"
+            die "Mode 'diff' requires exactly 2 snapshots (e.g., -L 2). Found: $ID_COUNT ($SNAPSHOT_IDS)"
         fi
         eval "restic -r \"$RESTIC_REPOSITORY\" diff $SNAPSHOT_IDS"
         ;;
@@ -98,6 +91,6 @@ case "$MODE" in
         ;;
         
     *)
-        die "Invalid mode: $MODE. Allowed: dirs, top-files, diff, raw."
+        die "Invalid mode: $MODE. Allowed: --dirs, --top-files, --diff, or -m raw."
         ;;
 esac
