@@ -28,10 +28,15 @@ while [ $# -gt 0 ]; do
     -L|--latest)      LATEST="${2:-}"; shift 2 ;;
     -S|--snapshot)    SNAPSHOT_IDS="${SNAPSHOT_IDS} ${2:-}"; shift 2 ;;
     -h|--help)
-      printf "Usage: stats.sh [-H host] [--diff | --dirs | --top-files | -m raw] [-L N]\n"
+      printf "Usage: stats.sh [-H host] [--diff | --dirs | --top-files | -m raw] [-L N] [snapshot_ids...]\n"
       exit 0 
       ;;
-    *)                shift ;;
+    -*)               die "Unknown option: $1" ;;
+    *)                
+      # Capture bare positional arguments as snapshot IDs
+      SNAPSHOT_IDS="${SNAPSHOT_IDS} $1"
+      shift 
+      ;;
   esac
 done
 
@@ -47,9 +52,15 @@ if [ -z "$SNAPSHOT_IDS" ]; then
   [ -n "$HOST" ] && SNAP_CMD="$SNAP_CMD --host \"$HOST\""
   
   # Strict regex matching: fetch ONLY the 8-character hex IDs.
-  # This prevents Restic footer text (e.g., "4 snapshots") from breaking the ID list.
-  SNAPSHOT_IDS=$(eval "$SNAP_CMD" | awk '/^[0-9a-f]{8}[[:space:]]/ {print $1}')
-  SNAPSHOT_IDS=$(printf '%s' "$SNAPSHOT_IDS" | tr '\n' ' ' | sed 's/ *$//')
+  FETCHED_IDS=$(eval "$SNAP_CMD" | awk '/^[0-9a-f]{8}[[:space:]]/ {print $1}')
+  
+  # If diffing, we must have exactly 2. Restic grouping might return more.
+  # Safely grab the last 2 chronologically.
+  if [ "$MODE" = "diff" ]; then
+    FETCHED_IDS=$(printf '%s\n' "$FETCHED_IDS" | tail -n 2)
+  fi
+  
+  SNAPSHOT_IDS=$(printf '%s' "$FETCHED_IDS" | tr '\n' ' ' | sed 's/ *$//')
   
   [ -n "$SNAPSHOT_IDS" ] || die "No snapshots found for the given filters."
 fi
