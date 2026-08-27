@@ -3,6 +3,20 @@
 set -eu
 
 ###############################################################################
+# Version Introspection
+###############################################################################
+RESTIC_OPS_VERSION="0.4.4"
+
+for _arg in "$@"; do
+  case "$_arg" in
+    -v|--version)
+      printf "restic-ops v%s\n" "$RESTIC_OPS_VERSION"
+      exit 0
+      ;;
+  esac
+done
+
+###############################################################################
 # Logging
 ###############################################################################
 log() { printf '%s %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
@@ -20,7 +34,6 @@ fi
 
 INCLUDE_FILE="$CONF_DIR/include.txt"
 EXCLUDE_FILE="$CONF_DIR/exclude.txt"
-
 
 if [ -z "${SECRETS:-}" ]; then
   SECRETS="$CONF_DIR/restic.env.gpg"

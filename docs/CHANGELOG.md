@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-08-27
+### Added
+- **Proactive Anomaly Detection:** `backup.sh` now tracks storage growth and automatically triggers root-cause analysis on unexpected data spikes (GiB/TiB thresholds).
+- **Version Introspection:** Centralized tool versioning (`RESTIC_OPS_VERSION`) natively exposed across all shell commands via `common.sh` using the `-v` or `--version` flags.
+
+### Changed
+- **Diagnostic Stats:** Rebuilt `stats.sh` around actionable troubleshooting modes (`--mode top-files`, `dirs`, `diff`) for instant storage introspection, dropping passive JSON-passthrough.
+- **Alert Formatting:** Replaced emojis with strict ASCII prefixes (`[ANOMALY]`, `[FAIL]`, `[OK]`) in `backup.sh` outputs to guarantee compatibility with `sieve`/`procmail` email routing.
+
 ## [0.4.3] - 2026-08-04
 ### Fixed
 - **Linting:** Resolved multiple ShellCheck warnings across all shell scripts to improve POSIX compliance and execution safety.
