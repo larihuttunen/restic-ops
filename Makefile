@@ -33,8 +33,8 @@ check-status:
 tag:
 	@echo "Syncing latest changes from remote main..."
 	git pull origin main --rebase
-	@echo "Creating annotated tag $(VERSION)..."
-	git tag -a $(VERSION) -m "Release $(VERSION)"
+	@echo "Creating signed tag $(VERSION)..."
+	git tag -s $(VERSION) -m "Release $(VERSION)"
 	@echo "Pushing tag $(VERSION) to origin..."
 	git push origin $(VERSION)
 	@echo "Success. GitHub Actions will now build the release for $(VERSION)."
