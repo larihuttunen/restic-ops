@@ -1,0 +1,21 @@
+name: ShellCheck
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bin/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'bin/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        run: shellcheck -x bin/*.sh
