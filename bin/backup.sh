@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# restic-ops: backup wrapper with anomaly detection
+# restic-ops: backup wrapper with anomaly detection and external mount safety
 set -eu
 SCRIPT_DIR="$(CDPATH="" cd -- "$(dirname "$0")" && pwd)"
 # shellcheck source=bin/common.sh
@@ -11,13 +11,34 @@ require_env RESTIC_REPOSITORY RESTIC_PASSWORD
 [ -f "$INCLUDE_FILE" ] || { log "ERROR: include file missing: $INCLUDE_FILE"; exit 1; }
 
 TMP_LOG=$(mktemp)
-trap 'rm -f "$TMP_LOG"' EXIT
+SAFE_INCLUDES=$(mktemp)
+trap 'rm -f "$TMP_LOG" "$SAFE_INCLUDES"' EXIT
+
+# --- 1. Internal Paths ---
+cat "$INCLUDE_FILE" > "$SAFE_INCLUDES"
+
+# --- 2. External Paths with Canary Check ---
+INCLUDE_EXT="${CONF_DIR:-/etc/restic-ops}/include-external.txt"
+if [ -f "$INCLUDE_EXT" ]; then
+    while IFS= read -r ext_path || [ -n "$ext_path" ]; do
+        # Skip comments and empty lines
+        case "$ext_path" in "#"*|"") continue ;; esac
+        
+        # Check for canary marker
+        if [ -f "${ext_path%/}/.restic.marker" ]; then
+            printf "%s\n" "$ext_path" >> "$SAFE_INCLUDES"
+            log "Included external path: $ext_path"
+        else
+            log "WARN: Marker missing or disk detached. Skipping: $ext_path"
+        fi
+    done < "$INCLUDE_EXT"
+fi
 
 log "Starting backup to $RESTIC_REPOSITORY"
 
 set +e
 restic -r "$RESTIC_REPOSITORY" backup \
-  --files-from "$INCLUDE_FILE" \
+  --files-from "$SAFE_INCLUDES" \
   --exclude-file "$EXCLUDE_FILE" \
   --exclude-caches \
   --one-file-system \
@@ -35,7 +56,6 @@ if printf "%s" "$ADDED_LINE" | grep -qE "GiB|TiB"; then
     printf "========================================\n"
     printf "Changes compared to the previous snapshot:\n\n"
     
-    # Calls the updated stats.sh to show exactly what caused the anomaly
     "$SCRIPT_DIR/stats.sh" -H "$(hostname)" -L 2 -m diff || true
     
     printf "\n========================================\n"

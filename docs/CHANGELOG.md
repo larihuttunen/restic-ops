@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file[cite: 19].
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)[cite: 19].
 
+## [0.5.0] - 2026-10-18
+
+### Added
+- **Unified Backup Flow**: `backup.sh` now intelligently handles both internal paths and external mounts in a single run.
+- **Canary Detection**: Automatically checks for `.restic.marker` on external mounts defined in `include-external.txt`. If the disk is detached, the path is safely skipped to prevent snapshotting empty directories.
+
+### Removed
+- Removed `backup-external.sh` as its functionality is now fully integrated into the core `backup.sh`.
+
 ## [0.4.6] - 2026-08-27
 ### Fixed
 - **Argument Parsing:** Fixed a bug in `stats.sh` where bare positional snapshot IDs (e.g., `--diff id1 id2`) were silently discarded by the `while` loop.
