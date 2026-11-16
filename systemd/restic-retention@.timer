@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly Restic retention (Profile: %i)
+
+[Timer]
+OnCalendar=Sun *-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=10min
+Unit=restic-retention@%i.service
+
+[Install]
+WantedBy=timers.target
