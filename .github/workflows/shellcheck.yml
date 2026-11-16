@@ -1,21 +1,30 @@
-name: ShellCheck
+name: CI Tests
 
 on:
   push:
     branches: [ main ]
     paths:
       - 'bin/**'
+      - 'tests/**'
   pull_request:
     branches: [ main ]
     paths:
       - 'bin/**'
+      - 'tests/**'
 
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Run ShellCheck
-        run: shellcheck -x bin/*.sh
+        # Keep enforcing strict POSIX checks
+        run: shellcheck -x -s sh bin/*.sh
+
+      - name: Install BATS
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      - name: Run Functional Tests
+        run: bats tests/

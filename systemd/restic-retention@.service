@@ -1,0 +1,18 @@
+[Unit]
+Description=Restic retention policy (Profile: %i)
+Documentation=https://github.com/restic/restic
+After=restic-backup@%i.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=GNUPGHOME=/root/.gnupg
+ExecStart=/usr/local/bin/restic-ops/bin/selector.sh %i retention
+Restart=no
+NoNewPrivileges=yes
+MemoryDenyWriteExecute=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadOnlyPaths=/usr/local/bin/restic-ops
+SyslogIdentifier=restic-retention-%i
