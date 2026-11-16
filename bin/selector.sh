@@ -111,8 +111,8 @@ if ! gpg --batch --quiet --pinentry-mode loopback --decrypt "$SECRETS" >/dev/nul
 fi
 
 # Export the selected profile context
-export RESTIC_OPS_PROFILE=$PROFILE
-export RESTIC_OPS_PROFILE_DIR=$PROFILE_DIR
+export RESTIC_OPS_PROFILE="$PROFILE"
+export RESTIC_OPS_PROFILE_DIR="$PROFILE_DIR"
 export CONF_DIR INCLUDE_FILE EXCLUDE_FILE
 
 # Execute the primitive
